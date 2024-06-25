@@ -102,7 +102,7 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
 
     private void addControl() {
         rcvProduct = findViewById(R.id.rcvProduct);
-        loadingLayout = findViewById(R.id.loadingLayout);
+        //loadingLayout = findViewById(R.id.loadingLayout);
         edtSearch = findViewById(R.id.search_text);
         imgFilter = findViewById(R.id.iv_filter);
         ivBack = findViewById(R.id.iv_back);

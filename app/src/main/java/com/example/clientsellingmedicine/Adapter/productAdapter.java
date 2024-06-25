@@ -98,9 +98,9 @@ public class productAdapter extends RecyclerView.Adapter <productAdapter.ViewHol
         }
         holder.tv_Discount.setText("-"+product.getDiscountPercent()+"%");
         holder.tvNameProductItem.setText(product.getName());
-        String unit = product.getUnit().getName();
+        //String unit = product.getUnit().getName();
         String price = Convert.convertPrice(product.getPrice());
-        holder.tvProductPrice.setText(price+"/"+unit);
+        //holder.tvProductPrice.setText(price+"/"+unit);
         Glide.with(holder.itemView.getContext())
                 .load(product.getImage())
                 .placeholder(R.drawable.loading_icon) // Hình ảnh thay thế khi đang tải

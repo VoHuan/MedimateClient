@@ -10,6 +10,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ProductService {
     @GET("/api/product")
@@ -17,6 +18,14 @@ public interface ProductService {
 
     @POST("/api/product/filter")
     Call<List<Product>> getProductsFilter ( @Body ProductFilter filter);
+
+//    @GET("/api/product/filter")
+//    Call<List<Product>> getProductsFilter(
+//            @Query("keySearch") String keySearch,
+//            @Query("categoryId") String categoryId,
+//            @Query("minPrice") int minPrice,
+//            @Query("maxPrice") int maxPrice
+//    );
 
     @GET("/api/product/newest")
     Call<List<Product>> getNewProducts();

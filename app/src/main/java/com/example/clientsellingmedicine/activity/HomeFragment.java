@@ -265,8 +265,8 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     }
 
     public void loadData() {
-        getTotalCartItem();
-        getTopProductsSelling();
+        //getTotalCartItem();
+        //getTopProductsSelling();
         getTopProductsDiscount();
         getTopNewProducts();
         showSlider();

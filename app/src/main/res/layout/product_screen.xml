@@ -11,9 +11,9 @@
         android:layout_height="80dp"
         android:background="@color/header_color"
         android:elevation="4dp"
-        android:orientation="horizontal"
         android:focusable="true"
         android:focusableInTouchMode="true"
+        android:orientation="horizontal"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         tools:ignore="MissingConstraints">
@@ -157,7 +157,7 @@
             android:layout_marginTop="6dp"
             android:background="@drawable/retangle_top_right_left"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@id/scrollview_content"
+
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -222,57 +222,6 @@
             </LinearLayout>
         </LinearLayout>
 
-        <ScrollView
-            android:id="@+id/scrollview_content"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:fillViewport="true"
-            app:layout_constraintBottom_toTopOf="@id/loadingLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/horizontal_content"
-            app:layout_constraintVertical_bias="0">
-            >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:orientation="vertical"
-                android:paddingBottom="8dp">
-                <!--                product -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rcvProduct"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                </androidx.recyclerview.widget.RecyclerView>
-
-            </LinearLayout>
-
-        </ScrollView>
-
-        <LinearLayout
-            android:id="@+id/loadingLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:orientation="vertical"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:indeterminate="true"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp" />
-
-        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
