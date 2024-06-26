@@ -1,7 +1,6 @@
 package com.example.clientsellingmedicine.services;
 
 import com.example.clientsellingmedicine.models.Product;
-import com.example.clientsellingmedicine.models.ProductFilter;
 
 import java.util.List;
 
@@ -16,16 +15,14 @@ public interface ProductService {
     @GET("/api/product")
     Call<List<Product>> getProducts();
 
-    @POST("/api/product/filter")
-    Call<List<Product>> getProductsFilter ( @Body ProductFilter filter);
 
-//    @GET("/api/product/filter")
-//    Call<List<Product>> getProductsFilter(
-//            @Query("keySearch") String keySearch,
-//            @Query("categoryId") String categoryId,
-//            @Query("minPrice") int minPrice,
-//            @Query("maxPrice") int maxPrice
-//    );
+    @GET("/api/product/filter")
+    Call<List<Product>> getProductsFilter(
+            @Query("keySearch") String keySearch,
+            @Query("categoryId") int categoryId,
+            @Query("minPrice") int minPrice,
+            @Query("maxPrice") int maxPrice
+    );
 
     @GET("/api/product/newest")
     Call<List<Product>> getNewProducts();

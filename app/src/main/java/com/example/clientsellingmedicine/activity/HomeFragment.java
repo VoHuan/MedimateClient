@@ -166,37 +166,28 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     private void addEvents(){
         rcvFeeds.addItemDecoration(new DividerItemDecoration(HomeFragment.this.getContext(), DividerItemDecoration.VERTICAL));
         View.OnClickListener onClickListener = v -> {
+            Intent intent = new Intent(getActivity(), ProductActivity.class);
+            int categoryID = -1;
+
             if (v.getId() == R.id.iv_medicine) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "1");
-                startActivity(intent);
+                categoryID = 1; 
             } else if (v.getId() == R.id.iv_health_care) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "2");
-                startActivity(intent);
+                categoryID = 2;
             } else if (v.getId() == R.id.iv_personal_care) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "3");
-                startActivity(intent);
+                categoryID = 3;
             } else if (v.getId() == R.id.iv_convenient_product) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "4");
-                startActivity(intent);
+                categoryID = 4;
             } else if (v.getId() == R.id.iv_functional_food) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "5");
-                startActivity(intent);
+                categoryID = 5;
             } else if (v.getId() == R.id.iv_mom_baby) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "6");
-                startActivity(intent);
+                categoryID = 6;
             } else if (v.getId() == R.id.iv_beauty_care) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "7");
-                startActivity(intent);
+                categoryID = 7;
             } else if (v.getId() == R.id.iv_medical_equipment) {
-                Intent intent = new Intent(getActivity(), ProductActivity.class);
-                intent.putExtra("categoryID", "8");
+                categoryID = 8;
+            }
+            if (categoryID != -1) {
+                intent.putExtra("categoryID", categoryID);
                 startActivity(intent);
             }
         };
@@ -211,19 +202,19 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
 
         tv_DisplayAllTopSale.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ProductActivity.class);
-            intent.putExtra("filtered", "top_sale");
+            intent.putExtra("productTypes", "top_sale");
             startActivity(intent);
         });
 
         tv_DisplayAllTopDiscount.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ProductActivity.class);
-            intent.putExtra("filtered", "top_discount");
+            intent.putExtra("productTypes", "top_discount");
             startActivity(intent);
         });
 
         tv_DisplayAllNewProduct.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), ProductActivity.class);
-            intent.putExtra("filtered", "new_product");
+            intent.putExtra("productTypes", "new_product");
             startActivity(intent);
         });
 

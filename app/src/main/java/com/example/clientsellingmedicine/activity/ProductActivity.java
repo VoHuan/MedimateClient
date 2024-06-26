@@ -37,7 +37,6 @@ import com.example.clientsellingmedicine.interfaces.IOnButtonAddToCartClickListe
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
 import com.example.clientsellingmedicine.models.CartItem;
 import com.example.clientsellingmedicine.models.Product;
-import com.example.clientsellingmedicine.models.ProductFilter;
 import com.example.clientsellingmedicine.services.CartService;
 import com.example.clientsellingmedicine.services.ProductService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
@@ -50,6 +49,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -66,26 +66,29 @@ import retrofit2.Response;
 
 public class ProductActivity extends AppCompatActivity implements IOnProductItemClickListener, IOnButtonAddToCartClickListener {
     private Context mContext;
-    RecyclerView rcvProduct;
-    productAdapter productAdapter;
+    private RecyclerView rcvProduct;
+    private productAdapter productAdapter;
 
-    LinearLayout ll_Sort_low_to_high, ll_Sort_high_to_low;
+    private LinearLayout ll_Sort_low_to_high, ll_Sort_high_to_low;
 
-    FrameLayout redCircleCart;
-    ImageView imgFilter,ivBack,ivCart;
+    private FrameLayout redCircleCart;
+    private ImageView imgFilter,ivBack,ivCart;
 
-    TextView tvNumberCart;
-    TextInputEditText edtSearch;
-    LinearLayout loadingLayout;
-    IOnProductItemClickListener listener;
+    private TextView tvNumberCart;
+    private TextInputEditText edtSearch;
 
     private boolean isSortLowToHigh = false;
     private boolean isSortHighToLow = false;
 
-    private String filtered;
+    private Handler handler = new Handler();
+    private Runnable searchRunnable;
 
-    private String categoryID;
-    private final ProductFilter productFilter = new ProductFilter();
+    private String productTypes; // products of [top-discounted, newest, best-seller, discounted]
+    // option filter
+    private Integer categoryID = -1;
+    private String keySearch;
+    private Integer maxPrice = Integer.MAX_VALUE;
+    private Integer minPrice = 0;
 
     private List<Product> products = new ArrayList<>();
 
@@ -120,10 +123,14 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
             showFilterPriceDialog();
         });
 
+        // go to cart screen
         ivCart.setOnClickListener(view -> {
             Intent intent = new Intent(this, CartActivity.class);
             startActivity(intent);
         });
+
+        //Back to home screen
+        ivBack.setOnClickListener(view -> finish());
 
         // sort product by price low to high
         ll_Sort_low_to_high.setOnClickListener(v -> {
@@ -169,51 +176,62 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
 
             @Override
             public void afterTextChanged(Editable s) {
-                Handler handler = new Handler();
-                handler.postDelayed(() -> {
-                    performSearch(edtSearch.getText().toString());
-                }, 1000);
+                handler.removeCallbacks(searchRunnable);
+                searchRunnable = () -> performSearch(s.toString(), categoryID, minPrice, maxPrice);
+                handler.postDelayed(searchRunnable, 500);
+
             }
         });
 
 
-        getTotalCartItem();
-        // set data for recyclerview
+        // display data
+        //getTotalCartItem();
         initRecyclerview();
     }
 
     public void initRecyclerview() {
-        // display all products of category from home screen
+        // Get category ID and Product Types
         Intent intent = getIntent();
-        categoryID = intent.getStringExtra("categoryID");
-        filtered = intent.getStringExtra("filtered");
-        // set default filter
-        productFilter.setMaxPrice(Integer.MAX_VALUE);
-        productFilter.setMinPrice(0);
+        if (intent.hasExtra("categoryID")) {
+            categoryID = intent.getIntExtra("categoryID",-1) ;
+        }
+        if (intent.hasExtra("productTypes")) {
+            productTypes = intent.getStringExtra("productTypes");
+        }
 
-        if (categoryID != null) {
-            productFilter.setIdCategory(Integer.parseInt(categoryID));
-            products = getProductsFiltered(productFilter);
-            productAdapter = new productAdapter(products, this, this);
-            rcvProduct.setLayoutManager(new GridLayoutManager(this, 2));
-            rcvProduct.setAdapter(productAdapter);
-        } else if (filtered != null && filtered.equals("top_sale")) {
-            products = getProductsTopSale();
-            productAdapter = new productAdapter(products, this, this);
-            rcvProduct.setLayoutManager(new GridLayoutManager(this, 2));
-            rcvProduct.setAdapter(productAdapter);
-        } else if (filtered != null && filtered.equals("top_discount")) {
-            products = getProductsTopDiscount();
+        // get products by category ID or Product Types
+        // by category ID
+        if (categoryID != -1) {
+            products = getProductsFiltered(keySearch, categoryID, minPrice, maxPrice);
             productAdapter = new productAdapter(products, this, this);
             rcvProduct.setLayoutManager(new GridLayoutManager(this, 2));
             rcvProduct.setAdapter(productAdapter);
         }
-        else { // filter = all products
-            products = getAllNewProducts();
-            productAdapter = new productAdapter(products, this, this);
-            rcvProduct.setLayoutManager(new GridLayoutManager(this, 2));
-            rcvProduct.setAdapter(productAdapter);
+        // by Product Types
+        else {
+             if (productTypes != null && productTypes.equals("top_sale")) {
+                products = getProductsTopSale();
+                productAdapter = new productAdapter(products, this, this);
+                rcvProduct.setLayoutManager(new GridLayoutManager(this, 2));
+                rcvProduct.setAdapter(productAdapter);
+
+            } else if (productTypes != null && productTypes.equals("top_discount")) {
+                products = getProductsTopDiscount();
+                productAdapter = new productAdapter(products, this, this);
+                rcvProduct.setLayoutManager(new GridLayoutManager(this, 2));
+                rcvProduct.setAdapter(productAdapter);
+
+            }
+            else { // productTypes = Newest product
+                products = getAllNewProducts();
+                productAdapter = new productAdapter(products, this, this);
+                rcvProduct.setLayoutManager(new GridLayoutManager(this, 2));
+                rcvProduct.setAdapter(productAdapter);
+
+            }
         }
+
+
 
     }
 
@@ -381,12 +399,12 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         }
     }
 
-    public List<Product> getProductsFiltered(ProductFilter filter) {
+    public List<Product> getProductsFiltered(String keySearch, Integer categoryId, Integer minPrice, Integer maxPrice) {
         ProductService addressService = ServiceBuilder.buildService(ProductService.class);
-        Call<List<Product>> call = addressService.getProductsFilter(filter);
+        Call<List<Product>> call = addressService.getProductsFilter(keySearch, categoryId, minPrice, maxPrice);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<List<Product>> future = executorService.submit((Callable<List<Product>>) () -> {
+        Future<List<Product>> future = executorService.submit(() -> {
             try {
                 Response<List<Product>> response = call.execute();
                 if (response.isSuccessful()) {
@@ -421,22 +439,21 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
     }
 
 
-    private void performSearch(String searchText) {
-        List<Product> filteredProducts = new ArrayList<>();
-        for (Product product : products) {
-            if (product.getName().toLowerCase().contains(searchText.toLowerCase())
-                    && product.getPrice() >= productFilter.getMinPrice()
-                    && product.getPrice() <= productFilter.getMaxPrice()) {
+    private void performSearch(String searchText, Integer categoryId, Integer min, Integer max) {
+        List<Product> filteredProducts = getProductsFiltered(searchText,categoryId,min,max);
 
-                filteredProducts.add(product);
-
-            }
-        }
         if (filteredProducts == null || filteredProducts.size() == 0) {
             Toast.makeText(mContext, "No result found", Toast.LENGTH_SHORT).show();
         } else {
-            productAdapter.setFilteredList(filteredProducts);
-
+            // sort before display data
+            if(isSortHighToLow){
+                sortProductsByPrice( filteredProducts, Comparator.comparingDouble(Product::getPrice).reversed());
+            }
+            else {
+                sortProductsByPrice( filteredProducts, Comparator.comparingDouble(Product::getPrice));
+            }
+            //display data
+            productAdapter.setList(filteredProducts);
         }
     }
 
@@ -565,19 +582,19 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
 
 
         //if filter price is selected
-        if (productFilter.getMinPrice() == 0 && productFilter.getMaxPrice() == 200000) {
+        if (minPrice == 0 && maxPrice == 200000) {
             ll_price1.setBackground(getResources().getDrawable(R.drawable.bg_type_address));
             et_min_price.setText("0.000đ");
             et_max_price.setText("200.000đ");
-        } else if (productFilter.getMinPrice() == 200000 && productFilter.getMaxPrice() == 1000000) {
+        } else if (minPrice == 200000 && maxPrice== 1000000) {
             ll_price2.setBackground(getResources().getDrawable(R.drawable.bg_type_address));
             et_min_price.setText("200.000đ");
             et_max_price.setText("1.000.000đ");
-        } else if (productFilter.getMinPrice() == 1000000 && productFilter.getMaxPrice() == 3000000) {
+        } else if (minPrice == 1000000 && maxPrice == 3000000) {
             ll_price3.setBackground(getResources().getDrawable(R.drawable.bg_type_address));
             et_min_price.setText("1.000.000đ");
             et_max_price.setText("3.000.000đ");
-        } else if (productFilter.getMinPrice() == 3000000 && productFilter.getMaxPrice() == Integer.MAX_VALUE) {
+        } else if (minPrice == 3000000 && maxPrice == Integer.MAX_VALUE) {
             ll_price4.setBackground(getResources().getDrawable(R.drawable.bg_type_address));
             et_min_price.setText("3.000.000đ");
         }
@@ -617,23 +634,23 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
             ll_price4.setBackground(getResources().getDrawable(R.drawable.order_selection_background));
             et_min_price.setText("");
             et_max_price.setText("");
-            productFilter.setMinPrice(0);
-            productFilter.setMaxPrice(Integer.MAX_VALUE);
+            minPrice = 0;
+            maxPrice = Integer.MAX_VALUE;
             // search product after filter
-            performSearch(edtSearch.getText().toString());
+            performSearch(edtSearch.getText().toString(), categoryID, minPrice, maxPrice);
             // dismiss dialog
             dialog.dismiss();
         });
 
         btn_Apply.setOnClickListener(v -> {
             if (!et_min_price.getText().toString().isEmpty()) {
-                productFilter.setMinPrice(Convert.convertCurrencyFormat(et_min_price.getText().toString()));
+                minPrice = Convert.convertCurrencyFormat(et_min_price.getText().toString());
             }
             if (!et_max_price.getText().toString().isEmpty()) {
-                productFilter.setMaxPrice(Convert.convertCurrencyFormat(et_max_price.getText().toString()));
+                maxPrice = Convert.convertCurrencyFormat(et_max_price.getText().toString());
             }
             // search product after filter
-            performSearch(edtSearch.getText().toString());
+            performSearch(edtSearch.getText().toString(), categoryID, minPrice, maxPrice);
             // dismiss dialog
             dialog.dismiss();
         });
@@ -647,7 +664,9 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
     }
 
 
-
+    public void sortProductsByPrice(List<Product> list, Comparator<Product> comparator) {
+        Collections.sort(list, comparator);
+    }
 
 
     private CompletableFuture<Integer> addToCart(CartItem cartItem) {
