@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnFeedItemClickListener;
-import com.example.clientsellingmedicine.models.Feed;
+import com.example.clientsellingmedicine.DTO.Feed;
 
 
 import java.util.List;

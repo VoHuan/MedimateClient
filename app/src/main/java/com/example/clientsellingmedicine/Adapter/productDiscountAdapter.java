@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.Product;
+import com.example.clientsellingmedicine.DTO.Product;
 
 import java.util.List;
 

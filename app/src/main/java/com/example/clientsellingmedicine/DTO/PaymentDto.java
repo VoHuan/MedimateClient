@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.models;
+package com.example.clientsellingmedicine.DTO;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentDto {
-    private List<CartItem> cartDetailDtoList;
+    private List<CartItemDTO> cartDetailDtoList;
     private Integer couponDetailId;
     private Order order;
 }

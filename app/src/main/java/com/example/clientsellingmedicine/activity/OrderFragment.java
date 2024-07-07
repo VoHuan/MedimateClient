@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.orderAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnOrderItemClickListener;
-import com.example.clientsellingmedicine.models.Order;
+import com.example.clientsellingmedicine.DTO.Order;
 
 import com.example.clientsellingmedicine.services.OrderService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;

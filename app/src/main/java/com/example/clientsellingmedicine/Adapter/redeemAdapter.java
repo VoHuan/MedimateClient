@@ -3,7 +3,6 @@ package com.example.clientsellingmedicine.Adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.CouponDetail;
+import com.example.clientsellingmedicine.DTO.CouponDetail;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.models;
+package com.example.clientsellingmedicine.DTO;
 
 import java.io.Serializable;
 import java.util.Date;

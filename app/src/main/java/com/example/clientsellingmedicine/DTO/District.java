@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.models;
+package com.example.clientsellingmedicine.DTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

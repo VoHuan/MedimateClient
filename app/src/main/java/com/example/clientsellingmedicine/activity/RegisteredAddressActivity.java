@@ -18,8 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.addressAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
-import com.example.clientsellingmedicine.models.AddressDto;
-import com.example.clientsellingmedicine.models.Product;
+import com.example.clientsellingmedicine.DTO.AddressDto;
+import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.services.AddressService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 

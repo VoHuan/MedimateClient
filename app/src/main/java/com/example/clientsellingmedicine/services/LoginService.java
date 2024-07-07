@@ -1,9 +1,9 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.models.GoogleToken;
-import com.example.clientsellingmedicine.models.User;
-import com.example.clientsellingmedicine.models.UserLogin;
-import com.example.clientsellingmedicine.models.Token;
+import com.example.clientsellingmedicine.DTO.GoogleToken;
+import com.example.clientsellingmedicine.DTO.User;
+import com.example.clientsellingmedicine.DTO.UserLogin;
+import com.example.clientsellingmedicine.DTO.Token;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.Order;
-import com.example.clientsellingmedicine.models.OrderDetail;
-import com.example.clientsellingmedicine.models.User;
+import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDetail;
+import com.example.clientsellingmedicine.DTO.User;
 import com.example.clientsellingmedicine.Adapter.orderDetailAdapter;
 import com.example.clientsellingmedicine.services.OrderService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;

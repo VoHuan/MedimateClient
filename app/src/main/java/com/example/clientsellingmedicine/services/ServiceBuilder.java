@@ -5,7 +5,7 @@ import android.os.Build;
 import android.util.Log;
 
 import com.example.clientsellingmedicine.activity.MyApplication;
-import com.example.clientsellingmedicine.models.Token;
+import com.example.clientsellingmedicine.DTO.Token;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.gson.Gson;
@@ -28,7 +28,7 @@ public class ServiceBuilder {
     //emulater
 //    private static final String URL = "http://10.0.2.2:9000/";
     //device
-    private static final String URL = "http://192.168.28.9:8080/"; //ip Wireless LAN adapter Wi-Fi:
+    private static final String URL = "http://192.168.1.108:8080/"; //ip Wireless LAN adapter Wi-Fi:
     //private static final String URL = "https://8d67-2402-9d80-3ac-37e7-a180-6d1d-43d5-2676.ngrok-free.app/"; //ip Wireless LAN adapter Wi-Fi:
     //private static final String URL = "http://192.168.43.175:8080/"; //ip Wireless LAN adapter Wi-Fi:
     // Create logger

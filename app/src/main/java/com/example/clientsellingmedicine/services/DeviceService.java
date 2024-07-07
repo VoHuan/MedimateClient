@@ -1,8 +1,6 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.models.Device;
-import com.example.clientsellingmedicine.models.Notification;
-import com.example.clientsellingmedicine.models.Token;
+import com.example.clientsellingmedicine.DTO.Device;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

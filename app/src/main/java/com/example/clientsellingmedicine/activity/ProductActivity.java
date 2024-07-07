@@ -35,8 +35,9 @@ import com.example.clientsellingmedicine.Adapter.productAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonAddToCartClickListener;
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
+import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.Product;
 import com.example.clientsellingmedicine.services.CartService;
 import com.example.clientsellingmedicine.services.ProductService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
@@ -185,7 +186,7 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
 
 
         // display data
-        //getTotalCartItem();
+        getTotalCartItem();
         initRecyclerview();
     }
 
@@ -241,7 +242,7 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         Call<List<Product>> call = productService.getHavePromotionProducts();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<List<com.example.clientsellingmedicine.models.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.models.Product>>) () -> {
+        Future<List<com.example.clientsellingmedicine.DTO.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.DTO.Product>>) () -> {
             try {
                 Response<List<Product>> response = call.execute();
                 if (response.isSuccessful()) {
@@ -272,7 +273,7 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         Call<List<Product>> call = productService.getNewProducts();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<List<com.example.clientsellingmedicine.models.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.models.Product>>) () -> {
+        Future<List<com.example.clientsellingmedicine.DTO.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.DTO.Product>>) () -> {
             try {
                 Response<List<Product>> response = call.execute();
                 if (response.isSuccessful()) {
@@ -301,7 +302,7 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         Call<List<Product>> call = productService.getBestSellerProducts();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<List<com.example.clientsellingmedicine.models.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.models.Product>>) () -> {
+        Future<List<com.example.clientsellingmedicine.DTO.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.DTO.Product>>) () -> {
             try {
                 Response<List<Product>> response = call.execute();
                 if (response.isSuccessful()) {
@@ -515,20 +516,21 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         });
 
         btn_AddToCart.setOnClickListener(v -> {
-            CartItem cartItem = new CartItem(product, quantity.get(), 1);
+            CartItem cartItem = new CartItem(0, product.getId(), quantity.get());
             addToCart(cartItem)
                     .thenAccept(result -> {
-                        if (result == 200) {
+                        if (result == 201) {
                             // reset total cart
                             getTotalCartItem();
 
                             //get CartItems Checked from SharedPreferences
-                            Type cartItemType = new TypeToken<List<CartItem>>() {}.getType();
-                            List<CartItem> listCartItemsChecked = SharedPref.loadData(this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+                            Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+                            List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
                             if(listCartItemsChecked == null){
                                 listCartItemsChecked = new ArrayList<>();
                             }
-                            listCartItemsChecked.add(cartItem);
+                            CartItemDTO cart = new CartItemDTO(product, quantity.get());
+                            listCartItemsChecked.add(cart);
                             // update CartItems Checked to SharedPreferences
                             SharedPref.saveData(this, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
                             Toast.makeText(mContext, "Add item to cart successfully", Toast.LENGTH_LONG).show();

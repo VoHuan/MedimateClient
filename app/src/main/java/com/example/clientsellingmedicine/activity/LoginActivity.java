@@ -18,9 +18,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.GoogleToken;
-import com.example.clientsellingmedicine.models.UserLogin;
-import com.example.clientsellingmedicine.models.Token;
+import com.example.clientsellingmedicine.DTO.GoogleToken;
+import com.example.clientsellingmedicine.DTO.UserLogin;
+import com.example.clientsellingmedicine.DTO.Token;
 import com.example.clientsellingmedicine.services.LoginService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;

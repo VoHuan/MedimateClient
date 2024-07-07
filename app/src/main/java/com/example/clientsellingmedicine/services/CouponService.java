@@ -1,7 +1,7 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.models.Coupon;
-import com.example.clientsellingmedicine.models.CouponDetail;
+import com.example.clientsellingmedicine.DTO.Coupon;
+import com.example.clientsellingmedicine.DTO.CouponDetail;
 
 import java.util.List;
 

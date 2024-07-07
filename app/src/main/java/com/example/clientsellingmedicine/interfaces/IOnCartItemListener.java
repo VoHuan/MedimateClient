@@ -1,7 +1,8 @@
 package com.example.clientsellingmedicine.interfaces;
 
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
+import com.example.clientsellingmedicine.DTO.Total;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.Total;
 
 public interface IOnCartItemListener {
     void setValueOfMasterCheckbox(boolean isChecked);

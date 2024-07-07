@@ -1,9 +1,9 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.models.MomoResponse;
-import com.example.clientsellingmedicine.models.Order;
-import com.example.clientsellingmedicine.models.OrderDetail;
-import com.example.clientsellingmedicine.models.PaymentDto;
+import com.example.clientsellingmedicine.DTO.MomoResponse;
+import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDetail;
+import com.example.clientsellingmedicine.DTO.PaymentDto;
 
 import java.util.List;
 

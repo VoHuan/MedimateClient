@@ -12,8 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.OrderDetail;
+import com.example.clientsellingmedicine.DTO.OrderDetail;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;

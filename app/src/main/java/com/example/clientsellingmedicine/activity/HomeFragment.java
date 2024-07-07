@@ -60,10 +60,11 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonAddToCartClickListener;
 import com.example.clientsellingmedicine.interfaces.IOnFeedItemClickListener;
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
+import com.example.clientsellingmedicine.DTO.Device;
+import com.example.clientsellingmedicine.DTO.Feed;
+import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.Device;
-import com.example.clientsellingmedicine.models.Feed;
-import com.example.clientsellingmedicine.models.Product;
 import com.example.clientsellingmedicine.services.CartService;
 import com.example.clientsellingmedicine.services.DeviceService;
 import com.example.clientsellingmedicine.services.ProductService;
@@ -256,7 +257,7 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     }
 
     public void loadData() {
-        //getTotalCartItem();
+        getTotalCartItem();
         //getTopProductsSelling();
         getTopProductsDiscount();
         getTopNewProducts();
@@ -562,21 +563,21 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
         });
 
         btn_AddToCart.setOnClickListener(v -> {
-            Log.d("tag", "quantity: " +quantity.get());
-            CartItem cartItem = new CartItem(product, quantity.get(), 1);
+            CartItem cartItem = new CartItem(0, product.getId(), quantity.get());
             addToCart(cartItem)
                     .thenAccept(result -> {
-                        if (result == 200) {
+                        if (result == 201) {
                             // reset total cart
                             getTotalCartItem();
 
                             //get CartItems Checked from SharedPreferences
-                            Type cartItemType = new TypeToken<List<CartItem>>() {}.getType();
-                            List<CartItem> listCartItemsChecked = SharedPref.loadData(getContext(), Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+                            Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+                            List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(getContext(), Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
                             if(listCartItemsChecked == null){
                                 listCartItemsChecked = new ArrayList<>();
                             }
-                            listCartItemsChecked.add(cartItem);
+                            CartItemDTO cart = new CartItemDTO(product, quantity.get()); //cartItem save to SharedPreferences
+                            listCartItemsChecked.add(cart);
                             // update CartItems Checked to SharedPreferences
                             SharedPref.saveData(getContext(), listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
                             Toast.makeText(mContext, "Add item to cart successfully", Toast.LENGTH_LONG).show();

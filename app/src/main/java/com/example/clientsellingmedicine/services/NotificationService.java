@@ -1,7 +1,6 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.models.CouponDetail;
-import com.example.clientsellingmedicine.models.Notification;
+import com.example.clientsellingmedicine.DTO.Notification;
 
 import java.util.List;
 

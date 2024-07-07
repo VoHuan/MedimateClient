@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.Adapter.redeemAdapter;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.CouponDetail;
+import com.example.clientsellingmedicine.DTO.CouponDetail;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 

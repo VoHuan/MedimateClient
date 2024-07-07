@@ -17,8 +17,9 @@ import com.bumptech.glide.Glide;
 
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnCartItemListener;
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
+import com.example.clientsellingmedicine.DTO.Total;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.Total;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
@@ -38,8 +39,8 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
     }
 
     private Context mContext;
-    public static List<CartItem> listCartItems;
-    public static List<CartItem> listCartItemsChecked = new ArrayList<>();
+    public static List<CartItemDTO> listCartItems;
+    public static List<CartItemDTO> listCartItemsChecked = new ArrayList<>();
 
     private boolean isAllSelected = false;
 
@@ -87,7 +88,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull cartAdapter.ViewHolder holder, int position) {
-        CartItem cart = listCartItems.get(position);
+        CartItemDTO cart = listCartItems.get(position);
         if (cart == null) {
             return;
         }
@@ -112,7 +113,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
 //        holder.checkboxCartItem.setChecked(isAllSelected());
 
-        Type cartItemType = new TypeToken<List<CartItem>>() {}.getType();
+        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
         //get CartItems Checked from SharedPreferences
         listCartItemsChecked = SharedPref.loadData(holder.itemView.getContext(), Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
         //if new user, CartItems Checked will be null
@@ -120,7 +121,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
             listCartItemsChecked = new ArrayList<>();
         }
         if (listCartItemsChecked != null) {
-            for (CartItem item : listCartItemsChecked) {
+            for (CartItemDTO item : listCartItemsChecked) {
                 if (item.getProduct().equals(cart.getProduct())) {
                     holder.checkboxCartItem.setChecked(true);
                     break;// checked item in cart
@@ -148,7 +149,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
             } else {
                 // Remove item from CartItems Checked
-                for (CartItem cartItem : listCartItemsChecked) {
+                for (CartItemDTO cartItem : listCartItemsChecked) {
                     if (cartItem.getProduct().equals(cart.getProduct())) {
                         listCartItemsChecked.remove(cartItem);
                         break;
@@ -206,7 +207,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
 
     // update listCartItemsChecked when user click on checkbox selected all
-    public void handleCheckBoxSelectedAll(List<CartItem> list, Boolean isAllSelected) {
+    public void handleCheckBoxSelectedAll(List<CartItemDTO> list, Boolean isAllSelected) {
         if (isAllSelected) {
             // update listCartItemsChecked
             this.listCartItemsChecked = list;
@@ -221,14 +222,14 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    public void setListCartItems(List<CartItem> list) {
+    public void setListCartItems(List<CartItemDTO> list) {
         this.listCartItems = list;
         notifyDataSetChanged();
     }
 
 
 
-    public void removeItems(CartItem cartItem) {
+    public void removeItems(CartItemDTO cartItem) {
         // Remove items from list Cart Items
         listCartItems.remove(cartItem);
         // update CartItems for RecyclerView
@@ -254,7 +255,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         int total = 0, totalProductDiscount = 0;
         if(listCartItemsChecked == null)
             return totalItem;
-        for (CartItem item: listCartItemsChecked) {
+        for (CartItemDTO item: listCartItemsChecked) {
             total += item.getProduct().getPrice() * item.getQuantity();
 
             int discountPercent = item.getProduct().getDiscountPercent();
@@ -281,13 +282,13 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
 
 
-    public void updateQuantityCartItem(Context context, CartItem item, int quantity) {
+    public void updateQuantityCartItem(Context context, CartItemDTO item, int quantity) {
         int oldQuantity = item.getQuantity();
         int newQuantity = oldQuantity + quantity;
         item.setQuantity(newQuantity);
         notifyDataSetChanged();
         // Save CartItems Checked to SharedPreferences
-        for (CartItem itemChecked : listCartItemsChecked) {
+        for (CartItemDTO itemChecked : listCartItemsChecked) {
             if (itemChecked.getProduct().equals(item.getProduct())) {
                 itemChecked.setQuantity(newQuantity);
                 SharedPref.saveData(context, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
@@ -297,6 +298,9 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         // get Total Amount Item Checked
         onCheckboxChangedListener.getTotal(calculateTotalAmount());
         //  update on database
-        onCheckboxChangedListener.updateCartItemQuantity(item);
+        CartItem cart = new CartItem();
+        cart.setQuantity(item.getQuantity());
+        cart.setId_product(item.getProduct().getId());
+        onCheckboxChangedListener.updateCartItemQuantity(cart);
     }
 }

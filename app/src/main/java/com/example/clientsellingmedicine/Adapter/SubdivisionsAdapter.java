@@ -12,9 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 
-import com.example.clientsellingmedicine.models.District;
-import com.example.clientsellingmedicine.models.Province;
-import com.example.clientsellingmedicine.models.Ward;
+import com.example.clientsellingmedicine.DTO.District;
+import com.example.clientsellingmedicine.DTO.Province;
+import com.example.clientsellingmedicine.DTO.Ward;
 
 import java.util.List;
 

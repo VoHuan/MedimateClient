@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
-import com.example.clientsellingmedicine.models.CouponDetail;
+import com.example.clientsellingmedicine.DTO.CouponDetail;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;

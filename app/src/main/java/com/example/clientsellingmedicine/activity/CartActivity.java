@@ -29,9 +29,10 @@ import com.example.clientsellingmedicine.Adapter.couponCheckboxAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnCartItemListener;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
+import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.Total;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.CouponDetail;
-import com.example.clientsellingmedicine.models.Total;
 import com.example.clientsellingmedicine.services.CartService;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
@@ -69,7 +70,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     LinearLayout ll_Discount;
     ImageView icon_arrow_up, ivBackCart;
     CheckBox checkboxCartItem, masterCheckboxCart;
-    List<CartItem> listProductsToBuy;
+    List<CartItemDTO> listProductsToBuy;
     Integer voucherDiscountPercent = 0;
 
     Integer totalProductDiscount = 0;
@@ -187,14 +188,12 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
                     .setPositiveButton("Xóa", (dialog, which) -> {
                         // Xử lý khi nhấn nút OK
                         // get list cart items checked
-                        Type cartItemType = new TypeToken<List<CartItem>>() {}.getType();
-                        List<CartItem> listCartItemsChecked = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+                        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+                        List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
                         if(listCartItemsChecked != null){
                             // delete cart item
-                            for (CartItem item: listCartItemsChecked) {
+                            for (CartItemDTO item: listCartItemsChecked) {
                                 deleteCartItem(item);
-                                cartAdapter.removeItems(item);
-                                tvTotalItemCart.setText("(" + cartAdapter.getItemCount() + ")");
                             }
                         }
                     })
@@ -214,11 +213,11 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
     public void buyProducts() {
         // get list cart items checked
-        Type cartItemType = new TypeToken<List<CartItem>>() {}.getType();
-        List<CartItem> listCartItemsChecked = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+        List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
         if(listCartItemsChecked != null && listCartItemsChecked.size() > 0){
             Intent intent = new Intent(mContext, PaymentActivity.class);
-            List<CartItem> listCartItems = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+            List<CartItemDTO> listCartItems = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
             intent.putExtra("products", (Serializable) listCartItems);
             intent.putExtra("totalPrice", tv_TotalPrice.getText().toString());
             intent.putExtra("totalAmount", tv_TotalAmountCart.getText().toString());
@@ -240,11 +239,11 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
     public void getCartItems() {
         CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<List<CartItem>> request = cartService.getCart();
-        request.enqueue(new Callback<List<CartItem>>() {
+        Call<List<CartItemDTO>> request = cartService.getCart();
+        request.enqueue(new Callback<List<CartItemDTO>>() {
 
             @Override
-            public void onResponse(Call<List<CartItem>> call, Response<List<CartItem>> response) {
+            public void onResponse(Call<List<CartItemDTO>> call, Response<List<CartItemDTO>> response) {
                 if (response.isSuccessful()) {
                     cartAdapter.setListCartItems(response.body());
                     tvTotalItemCart.setText("(" + cartAdapter.getItemCount() + ")"); // set total item in cart
@@ -263,7 +262,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
             }
 
             @Override
-            public void onFailure(Call<List<CartItem>> call, Throwable t) {
+            public void onFailure(Call<List<CartItemDTO>> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else
@@ -273,29 +272,31 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     }
 
 
-    private void deleteCartItem(CartItem cartItem) {
+    private void deleteCartItem(CartItemDTO cartItem) {
         CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<CartItem> request = cartService.deleteCartItem(cartItem.getProduct().getId());
-        request.enqueue(new Callback<CartItem>() {
+        Call<CartItemDTO> request = cartService.deleteCartItem(cartItem.getProduct().getId());
+        request.enqueue(new Callback<CartItemDTO>() {
             @Override
-            public void onResponse(Call<CartItem> call, Response<CartItem> response) {
+            public void onResponse(Call<CartItemDTO> call, Response<CartItemDTO> response) {
                 if (response.isSuccessful()) {
-                    //Toast.makeText(CartActivity.this, "Deleted item: " + cartItem.getProduct().getId(), Toast.LENGTH_LONG).show();
+                    //update UI after delete cart item
+                    cartAdapter.removeItems(cartItem);
+                    tvTotalItemCart.setText("(" + cartAdapter.getItemCount() + ")");
                 } else if (response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     finish();
                     startActivity(intent);
                 } else {
-                    Toast.makeText(mContext, "Failed to Deleted item", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<CartItem> call, Throwable t) {
+            public void onFailure(Call<CartItemDTO> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(CartActivity.this, "A connection error occurred", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(CartActivity.this, "Failed to delete item: " + cartItem.getProduct().getName(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(CartActivity.this, "Failed to delete cart item with ID: " + cartItem.getProduct().getId(), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -354,6 +355,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
         }
     }
+
 
     @Override
     public void updateCartItemQuantity(CartItem cartItem) {

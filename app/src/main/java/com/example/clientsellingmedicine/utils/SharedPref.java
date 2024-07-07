@@ -3,7 +3,7 @@ package com.example.clientsellingmedicine.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.clientsellingmedicine.models.Token;
+import com.example.clientsellingmedicine.DTO.Token;
 import com.google.gson.Gson;
 
 import java.lang.reflect.Type;

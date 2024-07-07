@@ -22,9 +22,9 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.ResponseDto;
-import com.example.clientsellingmedicine.models.Token;
-import com.example.clientsellingmedicine.models.User;
+import com.example.clientsellingmedicine.DTO.ResponseDto;
+import com.example.clientsellingmedicine.DTO.Token;
+import com.example.clientsellingmedicine.DTO.User;
 import com.example.clientsellingmedicine.services.LoginService;
 import com.example.clientsellingmedicine.services.LogoutService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;

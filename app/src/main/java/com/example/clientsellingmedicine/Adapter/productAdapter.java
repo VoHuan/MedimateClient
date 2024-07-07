@@ -16,7 +16,7 @@ import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonAddToCartClickListener;
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
-import com.example.clientsellingmedicine.models.Product;
+import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.Collections;
@@ -98,10 +98,9 @@ public class productAdapter extends RecyclerView.Adapter <productAdapter.ViewHol
         }
         holder.tv_Discount.setText("-"+product.getDiscountPercent()+"%");
         holder.tvNameProductItem.setText(product.getName());
-        //String unit = product.getUnit().getName();
+        String unit = product.getUnit().getName();
         String price = Convert.convertPrice(product.getPrice());
-        //holder.tvProductPrice.setText(price+"/"+unit);
-        holder.tvProductPrice.setText(price);
+        holder.tvProductPrice.setText(price+"/"+unit);
         Glide.with(holder.itemView.getContext())
                 .load(product.getImage())
                 .placeholder(R.drawable.loading_icon) // Hình ảnh thay thế khi đang tải

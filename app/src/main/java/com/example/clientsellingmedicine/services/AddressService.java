@@ -1,11 +1,10 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.models.AddressDto;
-import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.District;
-import com.example.clientsellingmedicine.models.Province;
-import com.example.clientsellingmedicine.models.ResponseDto;
-import com.example.clientsellingmedicine.models.Ward;
+import com.example.clientsellingmedicine.DTO.AddressDto;
+import com.example.clientsellingmedicine.DTO.District;
+import com.example.clientsellingmedicine.DTO.Province;
+import com.example.clientsellingmedicine.DTO.ResponseDto;
+import com.example.clientsellingmedicine.DTO.Ward;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package com.example.clientsellingmedicine.utils;
 
-import com.example.clientsellingmedicine.models.Token;
+import com.example.clientsellingmedicine.DTO.Token;
 import com.example.clientsellingmedicine.services.LoginService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 

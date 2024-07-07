@@ -15,7 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.Token;
+import com.example.clientsellingmedicine.DTO.Token;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.android.gms.tasks.OnCompleteListener;

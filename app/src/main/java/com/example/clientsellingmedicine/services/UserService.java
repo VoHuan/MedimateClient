@@ -1,8 +1,8 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.models.ResponseDto;
-import com.example.clientsellingmedicine.models.User;
-import com.example.clientsellingmedicine.models.UserLogin;
+import com.example.clientsellingmedicine.DTO.ResponseDto;
+import com.example.clientsellingmedicine.DTO.User;
+import com.example.clientsellingmedicine.DTO.UserLogin;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

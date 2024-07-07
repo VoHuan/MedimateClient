@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.Order;
+import com.example.clientsellingmedicine.DTO.Order;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;

@@ -21,8 +21,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
+import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.Product;
 import com.example.clientsellingmedicine.services.CartService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
@@ -114,6 +115,7 @@ public class DetailProductActivity extends AppCompatActivity {
         }
     }
 
+
     private CompletableFuture<Integer> addToCart(CartItem cartItem) {
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
@@ -192,20 +194,18 @@ public class DetailProductActivity extends AppCompatActivity {
         });
 
         btn_AddToCart.setOnClickListener(v -> {
-            CartItem cartItem = new CartItem(product, quantity.get(), 1);
+            CartItem cartItem = new CartItem(0, product.getId(), quantity.get());
             addToCart(cartItem)
                     .thenAccept(result -> {
-                        if (result == 200) {
-                            // reset total cart
-                            //getTotalCartItem();
-
+                        if (result == 201) {
                             //get CartItems Checked from SharedPreferences
-                            Type cartItemType = new TypeToken<List<CartItem>>() {}.getType();
-                            List<CartItem> listCartItemsChecked = SharedPref.loadData(this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+                            Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+                            List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
                             if(listCartItemsChecked == null){
                                 listCartItemsChecked = new ArrayList<>();
                             }
-                            listCartItemsChecked.add(cartItem);
+                            CartItemDTO cart = new CartItemDTO(product,quantity.get());
+                            listCartItemsChecked.add(cart);
                             // update CartItems Checked to SharedPreferences
                             SharedPref.saveData(this, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
                             Toast.makeText(mContext, "Add item to cart successfully", Toast.LENGTH_LONG).show();

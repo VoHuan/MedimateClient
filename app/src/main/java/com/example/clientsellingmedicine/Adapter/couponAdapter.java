@@ -1,7 +1,6 @@
 package com.example.clientsellingmedicine.Adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonExchangeCouponClickListener;
-import com.example.clientsellingmedicine.models.Coupon;
+import com.example.clientsellingmedicine.DTO.Coupon;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

@@ -29,12 +29,12 @@ import com.example.clientsellingmedicine.Adapter.confirmOrderAdapter;
 import com.example.clientsellingmedicine.Adapter.couponCheckboxAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
-import com.example.clientsellingmedicine.models.AddressDto;
-import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.models.CouponDetail;
-import com.example.clientsellingmedicine.models.MomoResponse;
-import com.example.clientsellingmedicine.models.Order;
-import com.example.clientsellingmedicine.models.PaymentDto;
+import com.example.clientsellingmedicine.DTO.AddressDto;
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
+import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.MomoResponse;
+import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.PaymentDto;
 import com.example.clientsellingmedicine.services.AddressService;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.OrderService;
@@ -81,7 +81,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
     private CouponDetail couponDetail = new CouponDetail();
 
-    private List<CartItem> products;
+    private List<CartItemDTO> products;
 
 
     private  couponCheckboxAdapter couponCheckboxAdapter ;
@@ -175,7 +175,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     private void getData() {
         // get data
         Intent intent = getIntent();
-        products = (List<CartItem>) intent.getSerializableExtra("products");
+        products = (List<CartItemDTO>) intent.getSerializableExtra("products");
         String totalPrice = intent.getStringExtra("totalPrice");
         String totalAmount = intent.getStringExtra("totalAmount");
         String totalProductDiscount = intent.getStringExtra("totalProductDiscount");

@@ -19,7 +19,7 @@ import com.example.clientsellingmedicine.Adapter.notificationAdapter;
 // Import for your reward points history adapter (if applicable)
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnNotificationItemClickListener;
-import com.example.clientsellingmedicine.models.Notification;
+import com.example.clientsellingmedicine.DTO.Notification;
 import com.example.clientsellingmedicine.services.NotificationService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 

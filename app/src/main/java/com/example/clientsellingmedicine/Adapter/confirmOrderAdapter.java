@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.CartItem;
+import com.example.clientsellingmedicine.DTO.CartItemDTO;
 import com.example.clientsellingmedicine.utils.Convert;
 
 
@@ -21,11 +21,11 @@ import java.util.List;
 
 
 public class confirmOrderAdapter extends RecyclerView.Adapter <confirmOrderAdapter.ViewHolder> {
-    private List<CartItem> mProducts;
+    private List<CartItemDTO> mProducts;
     private Context mContext;
 
 
-    public confirmOrderAdapter(List<CartItem> list) {
+    public confirmOrderAdapter(List<CartItemDTO> list) {
         this.mProducts = list;
     }
 
@@ -42,7 +42,7 @@ public class confirmOrderAdapter extends RecyclerView.Adapter <confirmOrderAdapt
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        CartItem cartItem = mProducts.get(position);
+        CartItemDTO cartItem = mProducts.get(position);
         if (cartItem == null) {
             return;
         }

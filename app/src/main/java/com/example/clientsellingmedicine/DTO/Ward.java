@@ -1,11 +1,12 @@
-package com.example.clientsellingmedicine.models;
+package com.example.clientsellingmedicine.DTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Province {
+public class Ward {
     private Integer id;
+    private Integer idDistrict;
     private String name;
 }

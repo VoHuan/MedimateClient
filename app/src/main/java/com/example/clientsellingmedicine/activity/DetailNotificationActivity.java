@@ -1,7 +1,6 @@
 package com.example.clientsellingmedicine.activity;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -10,7 +9,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.Notification;
+import com.example.clientsellingmedicine.DTO.Notification;
 
 import java.text.SimpleDateFormat;
 

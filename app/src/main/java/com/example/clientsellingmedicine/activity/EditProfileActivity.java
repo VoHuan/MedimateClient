@@ -22,7 +22,7 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.User;
+import com.example.clientsellingmedicine.DTO.User;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.services.UserService;
 import com.example.clientsellingmedicine.utils.Convert;

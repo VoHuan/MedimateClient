@@ -8,24 +8,17 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.webkit.WebSettingsCompat;
 import androidx.webkit.WebViewClientCompat;
-import androidx.webkit.WebViewClientCompat;
-import androidx.webkit.WebViewCompat;
-import androidx.webkit.WebResourceRequestCompat;
-import androidx.webkit.WebViewFeature;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.models.MomoResponse;
+import com.example.clientsellingmedicine.DTO.MomoResponse;
 
 import java.net.URISyntaxException;
 
