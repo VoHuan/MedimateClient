@@ -22,7 +22,7 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonExchangeCouponClickListener;
 import com.example.clientsellingmedicine.DTO.Coupon;
 import com.example.clientsellingmedicine.DTO.CouponDetail;
-import com.example.clientsellingmedicine.DTO.User;
+import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.services.UserService;
@@ -44,7 +44,7 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
     private RecyclerView rcvAccoumlatePointsItem;
     private LinearLayout ll_Empty;
     private Button btnHistory;
-    private User user;
+    private UserDTO user;
     public ExchangeFragment(){}
 
     @Nullable
@@ -82,11 +82,11 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
 
     private void getPoints(){
         UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<User> request = userService.getUser();
+        Call<UserDTO> request = userService.getUser();
 
-        request.enqueue(new Callback<User>() {
+        request.enqueue(new Callback<UserDTO>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                 if(response.isSuccessful()){
                     user = response.body();
                     // Set point
@@ -100,7 +100,7 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<UserDTO> call, Throwable t) {
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {

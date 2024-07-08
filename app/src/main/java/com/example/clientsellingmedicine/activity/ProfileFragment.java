@@ -23,9 +23,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.ResponseDto;
-import com.example.clientsellingmedicine.DTO.Token;
-import com.example.clientsellingmedicine.DTO.User;
-import com.example.clientsellingmedicine.services.LoginService;
+import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.services.LogoutService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.services.UserService;
@@ -49,7 +47,7 @@ public class ProfileFragment extends Fragment {
     private LinearLayout ll_AddressBook,ll_EditProfile;
 
 
-    private static User user = new User();
+    private static UserDTO user = new UserDTO();
     public ProfileFragment() {
         // Required empty public constructor
     }
@@ -117,11 +115,11 @@ public class ProfileFragment extends Fragment {
 
     public void getUserLogin() {
         UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<User> request = userService.getUser();
-        request.enqueue(new Callback<User>() {
+        Call<UserDTO> request = userService.getUser();
+        request.enqueue(new Callback<UserDTO>() {
 
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                 if (response.isSuccessful()) {
                     user = response.body();
                     if(user != null){
@@ -153,7 +151,7 @@ public class ProfileFragment extends Fragment {
 
             @SuppressLint("SuspiciousIndentation")
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<UserDTO> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else
@@ -163,32 +161,32 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    public void RefreshToken(){
-        LoginService loginService = ServiceBuilder.buildService(LoginService.class);
-        Token token = SharedPref.loadToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN);
-        Call<Token> requestRefreshToken = loginService.refreshToken(token);
-        requestRefreshToken.enqueue(new Callback<Token>() {
-            @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
-                if (response.isSuccessful()) {
-                    Token token = response.body();
-                    SharedPref.saveToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN, token);
-                    Log.d("tag", "onResponse: "+response.body());
-                } else if (response.code() == 401) {
-                    Toast.makeText(mContext, "Your session has expired", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<Token> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
-                } else
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
+//    public void RefreshToken(){
+//        LoginService loginService = ServiceBuilder.buildService(LoginService.class);
+//        Token token = SharedPref.loadToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN);
+//        Call<Token> requestRefreshToken = loginService.refreshToken();
+//        requestRefreshToken.enqueue(new Callback<Token>() {
+//            @Override
+//            public void onResponse(Call<Token> call, Response<Token> response) {
+//                if (response.isSuccessful()) {
+//                    Token token = response.body();
+//                    SharedPref.saveToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN, token);
+//                    Log.d("tag", "onResponse: "+response.body());
+//                } else if (response.code() == 401) {
+//                    Toast.makeText(mContext, "Your session has expired", Toast.LENGTH_LONG).show();
+//                } else {
+//                    Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
+//                }
+//            }
+//            @Override
+//            public void onFailure(Call<Token> call, Throwable t) {
+//                if (t instanceof IOException) {
+//                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
+//                } else
+//                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+//            }
+//        });
+//    }
 
     public void Logout() {
         LogoutService logoutService = ServiceBuilder.buildService(LogoutService.class);

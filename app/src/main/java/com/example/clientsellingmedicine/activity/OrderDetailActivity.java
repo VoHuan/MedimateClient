@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.Order;
 import com.example.clientsellingmedicine.DTO.OrderDetail;
-import com.example.clientsellingmedicine.DTO.User;
+import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.Adapter.orderDetailAdapter;
 import com.example.clientsellingmedicine.services.OrderService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
@@ -98,13 +98,13 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     public void getUserInfo() {
         UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<User> request = userService.getUser();
-        request.enqueue(new Callback<User>() {
+        Call<UserDTO> request = userService.getUser();
+        request.enqueue(new Callback<UserDTO>() {
 
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                 if (response.isSuccessful()) {
-                    User user = response.body();
+                    UserDTO user = response.body();
                     if(user.getUsername() != null ){
                         tv_userName.setText(user.getUsername());
                     }else if(user.getPhone() != null) {
@@ -125,7 +125,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
             @SuppressLint("SuspiciousIndentation")
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<UserDTO> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else

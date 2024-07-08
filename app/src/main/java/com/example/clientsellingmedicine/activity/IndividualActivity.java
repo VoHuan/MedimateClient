@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.User;
+import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.services.UserService;
 import com.example.clientsellingmedicine.utils.Convert;
@@ -30,7 +30,7 @@ public class IndividualActivity extends AppCompatActivity {
     private TextView tvName, tvPhone, tvGender, tvBirthday, tvUserID;
     private Button btnEditProfile;
     private ImageView ivAvatar;
-    private static User user = new User();
+    private static UserDTO user = new UserDTO();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +66,11 @@ public class IndividualActivity extends AppCompatActivity {
 
     public void getUserLogin() {
         UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<User> request = userService.getUser();
-        request.enqueue(new Callback<User>() {
+        Call<UserDTO> request = userService.getUser();
+        request.enqueue(new Callback<UserDTO>() {
 
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                 if (response.isSuccessful()) {
                     user = response.body();
                     if (user != null) {
@@ -79,7 +79,7 @@ public class IndividualActivity extends AppCompatActivity {
                         tvPhone.setText(user.getPhone() != null ? user.getPhone() : "Unknown");
                         tvGender.setText(user.getGender() == 1 ? "Nam" : "Nữ");
                         String birthday = (user.getBirthday() != null ? Convert.convertToDate(user.getBirthday().toString()) : null);
-                        tvBirthday.setText(birthday != null ? birthday : "");
+                        tvBirthday.setText(birthday != null ? birthday : "Unknown");
 
                         Glide.with(mContext)
                                 .load(user.getImage())
@@ -99,7 +99,7 @@ public class IndividualActivity extends AppCompatActivity {
 
             @SuppressLint("SuspiciousIndentation")
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<UserDTO> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else

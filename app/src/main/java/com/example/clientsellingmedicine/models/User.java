@@ -1,7 +1,5 @@
-package com.example.clientsellingmedicine.DTO;
+package com.example.clientsellingmedicine.models;
 
-
-import java.io.Serializable;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -11,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements Serializable {
+public class User {
     private Integer id;
-    private Integer idRole;
+    private String role;
     private String phone;
     private String email;
     private String username;
@@ -24,5 +22,4 @@ public class User implements Serializable {
     private Integer gender;
     private String image;
     private Integer status;
-
 }

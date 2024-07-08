@@ -68,7 +68,7 @@ public class ServiceBuilder {
                                         Token currentToken = SharedPref.loadToken(MyApplication.getContext(), Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN);
 
                                         if (currentToken != null && currentToken.getAccessToken().equals(token.getAccessToken())) {
-                                            int code = refreshToken(token) / 100;
+                                            int code = refreshToken() / 100;
                                             if (code == 2) { // Nếu refresh token thành công
                                                 Token newToken = SharedPref.loadToken(MyApplication.getContext(), Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN);
                                                 setAuthHeader(builder, newToken);
@@ -106,21 +106,19 @@ public class ServiceBuilder {
             builder.header("Authorization", String.format("Bearer %s", token.getAccessToken()));
     }
 
-    private static int refreshToken(Token token) {
+    private static int refreshToken() {
         LoginService loginService = ServiceBuilder.buildService(LoginService.class);
-        Call<Token> requestRefreshToken = loginService.refreshToken(token);
+        Call<Token> requestRefreshToken = loginService.refreshToken();
 
         try {
             retrofit2.Response<Token> response = requestRefreshToken.execute();
 
-            if (response.isSuccessful()) {
+            if(response.isSuccessful()) {
                 Token newToken = response.body();
                 SharedPref.saveToken(MyApplication.getContext(), Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN, newToken);
-                Log.d("tag", "onResponse: " + response.body());
-                return response.code();
-            } else {
-                return response.code();
+                //Log.d("tag", "onResponse: " + response.body());
             }
+            return response.code();
         } catch (IOException e) {
             return 500; // Trả về mã lỗi mặc định
         }

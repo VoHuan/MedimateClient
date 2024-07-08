@@ -31,7 +31,7 @@ import com.example.clientsellingmedicine.DTO.AddressDto;
 import com.example.clientsellingmedicine.DTO.District;
 import com.example.clientsellingmedicine.DTO.Province;
 import com.example.clientsellingmedicine.DTO.ResponseDto;
-import com.example.clientsellingmedicine.DTO.User;
+import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.DTO.Ward;
 import com.example.clientsellingmedicine.services.AddressService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
@@ -199,7 +199,7 @@ public class AddAddressActivity extends AppCompatActivity {
                 updateAddress(address);
             } else {
                 // get id user
-                User user = getUser();
+                UserDTO user = getUser();
                 // add new address
                 AddressDto addressNew = new AddressDto();
                 addressNew.setIdUser(user.getId());
@@ -457,14 +457,14 @@ public class AddAddressActivity extends AppCompatActivity {
     }
 
 
-    public User getUser() {
+    public UserDTO getUser() {
         UserService addressService = ServiceBuilder.buildService(UserService.class);
-        Call<User> call = addressService.getUser();
+        Call<UserDTO> call = addressService.getUser();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<User> future = executorService.submit((Callable<User>) () -> {
+        Future<UserDTO> future = executorService.submit((Callable<UserDTO>) () -> {
             try {
-                Response<User> response = call.execute();
+                Response<UserDTO> response = call.execute();
                 if (response.isSuccessful()) {
                     return response.body();
                 } else {

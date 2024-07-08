@@ -22,7 +22,7 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.User;
+import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.services.UserService;
 import com.example.clientsellingmedicine.utils.Convert;
@@ -109,7 +109,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void loadInfo() {
         Intent intent = getIntent();
-        User user = (User) intent.getSerializableExtra("user");
+        UserDTO user = (UserDTO) intent.getSerializableExtra("user");
         if (user != null) {
             edtUserName.setText(user.getUsername() == null ? "" : user.getUsername());
             edtPhoneNumber.setText(user.getPhone());
@@ -153,7 +153,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void handleUpdateInfo() {
         // Xử lý cập nhật thông tin cá nhân
-        User userUpdate = new User();
+        UserDTO userUpdate = new UserDTO();
         userUpdate.setUsername(edtUserName.getText().toString());
         if(edtPhoneNumber.getText() != null && !edtPhoneNumber.getText().toString().isEmpty()){
             userUpdate.setPhone(edtPhoneNumber.getText().toString());
@@ -176,12 +176,12 @@ public class EditProfileActivity extends AppCompatActivity {
         updateUser(userUpdate);
     }
 
-    private void updateUser(User userUpdate) {
+    private void updateUser(UserDTO userUpdate) {
         UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<User> request = userService.updateUser(userUpdate);
-        request.enqueue(new Callback<User>() {
+        Call<UserDTO> request = userService.updateUser(userUpdate);
+        request.enqueue(new Callback<UserDTO>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
                 if (response.isSuccessful()) {
                     finish();
                 } else if (response.code() == 401) {
@@ -195,7 +195,7 @@ public class EditProfileActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void onFailure(Call<UserDTO> call, Throwable t) {
                 // Cập nhật thông tin cá nhân thất bại
                 // Hiển thị thông báo lỗi
                 Toast.makeText(mContext, "Cập nhật thông tin cá nhân thất bại", Toast.LENGTH_SHORT).show();
