@@ -1,8 +1,8 @@
 package com.example.clientsellingmedicine.services;
 
 import com.example.clientsellingmedicine.DTO.MomoResponse;
-import com.example.clientsellingmedicine.DTO.Order;
-import com.example.clientsellingmedicine.DTO.OrderDetail;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
+import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
 import com.example.clientsellingmedicine.DTO.PaymentDto;
 
 import java.util.List;
@@ -14,15 +14,11 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface OrderService {
-    @GET("/api/orders")
-    Call<List<Order>> getOrders();
+    @GET("/api/order")
+    Call<List<OrderDTO>> getOrders();
 
-
-    @GET("order/{id}")
-    Call<Order> getOrder(@Path("id")int id);
-
-    @GET("/api/order_detail/{id}")
-    Call<List<OrderDetail>> getOrderItem(@Path("id")int id);
+    @GET("/api/order-detail/{id}")
+    Call<List<OrderDetailDTO>> getOrderItem(@Path("id")int id);
 
     @POST("/api/orders")
     Call<MomoResponse> newOrder(@Body PaymentDto order);

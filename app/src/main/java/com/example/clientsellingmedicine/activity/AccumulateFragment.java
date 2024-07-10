@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.Adapter.accumulateAdapter;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.services.OrderService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 
@@ -72,15 +72,15 @@ public class AccumulateFragment extends Fragment {
 
     private void getAllAccumulatePointHistory() {
         OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<List<Order>> request = orderService.getOrders();
+        Call<List<OrderDTO>> request = orderService.getOrders();
 
-        request.enqueue(new Callback<List<Order>>() {
+        request.enqueue(new Callback<List<OrderDTO>>() {
             @Override
-            public void onResponse(Call<List<Order>> call, Response<List<Order>> response) {
+            public void onResponse(Call<List<OrderDTO>> call, Response<List<OrderDTO>> response) {
                 if(response.isSuccessful()){
                     if(response.body().size() > 0){
                         accumulateAdapter = new accumulateAdapter(response.body().stream()
-                                .sorted(Comparator.comparing(Order::getOrderTime).reversed())  // sort by date
+                                .sorted(Comparator.comparing(OrderDTO::getOrderTime).reversed())  // sort by date
                                 .collect(Collectors.toList()));
                         rcvAccumulatePointsHistory.setAdapter(accumulateAdapter);
                         rcvAccumulatePointsHistory.setLayoutManager(new LinearLayoutManager(mContext));
@@ -96,7 +96,7 @@ public class AccumulateFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<Order>> call, Throwable t) {
+            public void onFailure(Call<List<OrderDTO>> call, Throwable t) {
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {

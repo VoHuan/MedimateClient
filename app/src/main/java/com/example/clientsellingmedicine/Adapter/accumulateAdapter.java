@@ -12,18 +12,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;
 
 
 public class accumulateAdapter extends RecyclerView.Adapter<accumulateAdapter.ViewHolder> {
-    private List<Order> mOrders;
+    private List<OrderDTO> mOrders;
     private Context mContext;
 
 
-    public accumulateAdapter(List<Order> list) {
+    public accumulateAdapter(List<OrderDTO> list) {
         this.mOrders = list;
     }
 
@@ -40,7 +40,7 @@ public class accumulateAdapter extends RecyclerView.Adapter<accumulateAdapter.Vi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Order order = mOrders.get(position);
+        OrderDTO order = mOrders.get(position);
         if (order == null) {
             return;
         }

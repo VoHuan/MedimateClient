@@ -1,6 +1,4 @@
-package com.example.clientsellingmedicine.DTO;
-
-import com.example.clientsellingmedicine.models.User;
+package com.example.clientsellingmedicine.models;
 
 import java.io.Serializable;
 
@@ -11,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressDto implements Serializable {
+public class Address  {
     private Integer id;
     private Integer id_user;
     private String user_name;
@@ -20,7 +18,7 @@ public class AddressDto implements Serializable {
     private String district;
     private String province;
     private String type;
-    private Boolean is_default;
-    private String specific_address;
+    private Boolean isDefault;
+    private String specificAddress;
     private Integer status;
 }

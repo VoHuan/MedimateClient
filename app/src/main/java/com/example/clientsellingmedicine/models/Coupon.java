@@ -1,19 +1,18 @@
-package com.example.clientsellingmedicine.DTO;
+package com.example.clientsellingmedicine.models;
 
-import java.io.Serializable;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Coupon implements Serializable {
+@AllArgsConstructor
+public class Coupon {
     private Integer id;
-    private String code;
     private String description;
     private Integer point;
     private Integer discountPercent;
-    private Integer expirationTime;
+    private Integer usageDays;
     private String image;
     private Integer status;
 }

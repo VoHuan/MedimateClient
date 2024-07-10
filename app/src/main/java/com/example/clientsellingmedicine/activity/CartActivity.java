@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,7 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnCartItemListener;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
 import com.example.clientsellingmedicine.DTO.CartItemDTO;
-import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.Total;
 import com.example.clientsellingmedicine.models.CartItem;
 import com.example.clientsellingmedicine.services.CartService;
@@ -42,6 +43,7 @@ import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
@@ -80,7 +82,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     Button btn_Buy,btn_Apply;
     TextInputEditText txt_input_code;
 
-    private CouponDetail couponDetail ;
+    private RedeemedCouponDTO couponDetail ;
     private Boolean isShowBottomView = false;
 
     @Override
@@ -215,10 +217,13 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         // get list cart items checked
         Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
         List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+        //Gson gson = new Gson();
+
+        //.d("tag", "buyProducts: "+  gson.toJson(listCartItemsChecked));
         if(listCartItemsChecked != null && listCartItemsChecked.size() > 0){
             Intent intent = new Intent(mContext, PaymentActivity.class);
-            List<CartItemDTO> listCartItems = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
-            intent.putExtra("products", (Serializable) listCartItems);
+            //List<CartItemDTO> listCartItems = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+            intent.putExtra("products", (Serializable) listCartItemsChecked);
             intent.putExtra("totalPrice", tv_TotalPrice.getText().toString());
             intent.putExtra("totalAmount", tv_TotalAmountCart.getText().toString());
             intent.putExtra("totalProductDiscount", tv_TotalProductDiscount.getText().toString());
@@ -386,33 +391,30 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         });
     }
 
-    public List<CouponDetail> getCoupons() {
+    public List<RedeemedCouponDTO> getCoupons() {
         CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<CouponDetail>> call = couponService.getCoupon();
+        Call<List<RedeemedCouponDTO>> call = couponService.getRedeemedCoupons();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<List<CouponDetail>> future = executorService.submit(new Callable<List<CouponDetail>>() {
-            @Override
-            public List<CouponDetail> call() throws Exception {
-                try {
-                    Response<List<CouponDetail>> response = call.execute();
-                    if (response.isSuccessful()) {
-                        return response.body();
-                    } else if (response.code() == 401) {
-                        // Xử lý khi mã trạng thái là 401 (Unauthorized)
-                        // Ví dụ: chuyển đến màn hình đăng nhập
-                        Intent intent = new Intent(mContext, LoginActivity.class);
-                        finish();
-                        mContext.startActivity(intent);
-                        return null;
-                    } else {
-                        Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
-                        return null;
-                    }
-                } catch (IOException e) {
-                    Toast.makeText(mContext, "A connection error occurred", Toast.LENGTH_LONG).show();
+        Future<List<RedeemedCouponDTO>> future = executorService.submit(() -> {
+            try {
+                Response<List<RedeemedCouponDTO>> response = call.execute();
+                if (response.isSuccessful()) {
+                    return response.body();
+                } else if (response.code() == 401) {
+                    // Xử lý khi mã trạng thái là 401 (Unauthorized)
+                    // Ví dụ: chuyển đến màn hình đăng nhập
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    finish();
+                    mContext.startActivity(intent);
+                    return null;
+                } else {
+                    Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
                     return null;
                 }
+            } catch (IOException e) {
+                Toast.makeText(mContext, "A connection error occurred", Toast.LENGTH_LONG).show();
+                return null;
             }
         });
 
@@ -464,6 +466,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         });
 
         couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), CartActivity.this, positionVoucherItemSelected);
+        //couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), CartActivity.this);
         rcv_coupon.setAdapter(couponCheckboxAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         rcv_coupon.setLayoutManager(layoutManager);
@@ -492,12 +495,12 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         dialog.getWindow().setGravity(Gravity.BOTTOM);
     }
 
-    public void handlerApplyCoupon(CouponDetail couponDetail) {
-        if(couponDetail != null){
-            tv_Discount.setText("Mã khuyến mãi: "+ couponDetail.getCoupon().getCode()); // display coupon code
+    public void handlerApplyCoupon(RedeemedCouponDTO redeemedCoupon) {
+        if(redeemedCoupon != null){
+            tv_Discount.setText("Mã khuyến mãi: "+ redeemedCoupon.getCode()); // display coupon code
             int total = Convert.convertCurrencyFormat(tv_TotalPrice.getText().toString().trim()); // get total price
             int totalProductDiscount = Convert.convertCurrencyFormat(tv_TotalProductDiscount.getText().toString().trim()); // get total product discount
-            int totalVoucherDiscount = couponDetail.getCoupon().getDiscountPercent() * total / 100; // calculate voucher discount
+            int totalVoucherDiscount = redeemedCoupon.getCoupon().getDiscountPercent() * total / 100; // calculate voucher discount
             int totalAmountCart = total - totalVoucherDiscount - totalProductDiscount; // calculate total amount
             tv_TotalVoucherDiscount.setText(Convert.convertPrice(totalVoucherDiscount)); // display voucher discount
             tv_TotalAmountCart.setText( Convert.convertPrice(totalAmountCart)); // display total amount

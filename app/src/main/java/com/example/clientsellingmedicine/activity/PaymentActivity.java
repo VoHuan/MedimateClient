@@ -31,9 +31,9 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
 import com.example.clientsellingmedicine.DTO.AddressDto;
 import com.example.clientsellingmedicine.DTO.CartItemDTO;
-import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.MomoResponse;
-import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.DTO.PaymentDto;
 import com.example.clientsellingmedicine.services.AddressService;
 import com.example.clientsellingmedicine.services.CouponService;
@@ -79,7 +79,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
     private Integer voucherDiscountPercent = 0;
 
-    private CouponDetail couponDetail = new CouponDetail();
+    private RedeemedCouponDTO redeemedCoupon = new RedeemedCouponDTO();
 
     private List<CartItemDTO> products;
 
@@ -156,15 +156,15 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             }
             PaymentDto orderDto = new PaymentDto();
 
-            Order order = new Order();
+            OrderDTO order = new OrderDTO();
             order.setPaymentMethod(tv_paymentMethod.getText().toString());
             order.setNote(edt_noteOrder.getText().toString());
             order.setUserAddress(tv_address.getText().toString());
 
             orderDto.setOrder(order);
             orderDto.setCartDetailDtoList(products);
-            if(couponDetail != null){
-                orderDto.setCouponDetailId(couponDetail.getId());
+            if(redeemedCoupon != null){
+                orderDto.setCouponDetailId(redeemedCoupon.getId());
             }
             newOrder(orderDto);
         });
@@ -181,7 +181,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         String totalProductDiscount = intent.getStringExtra("totalProductDiscount");
         String totalVoucherDiscount = intent.getStringExtra("totalVoucherDiscount");
         positionVoucherItemSelected = intent.getIntExtra("positionVoucherItemSelected",-1);
-        couponDetail = (CouponDetail) intent.getSerializableExtra("couponDetail");
+        redeemedCoupon = (RedeemedCouponDTO) intent.getSerializableExtra("couponDetail");
 
         // set data
         tv_totalPrice.setText(totalPrice);
@@ -197,10 +197,10 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         rcvOrderItem.setAdapter(confirmOrderAdapter);
         rcvOrderItem.setLayoutManager(new LinearLayoutManager(mContext));
 
-        if(couponDetail != null){
+        if(redeemedCoupon != null){
             tv_voucherCode.setVisibility(TextView.VISIBLE);
             tv_addVoucher.setVisibility(TextView.GONE);
-            tv_voucherCode.setText(couponDetail.getCoupon().getCode());
+            tv_voucherCode.setText(redeemedCoupon.getCode());
         }
 
         getAddress();
@@ -265,9 +265,9 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
                        ll_address.setVisibility(LinearLayout.VISIBLE);
                        ll_addAddress.setVisibility(LinearLayout.GONE);
                        for (AddressDto addressDto : list ) {
-                           if(addressDto.getIsDefault()){
+                           if(addressDto.getIs_default()){
                                // set address default
-                               tv_address.setText(addressDto.getSpecificAddress()+", "+addressDto.getWard()+", "+addressDto.getDistrict()+", "+addressDto.getProvince());
+                               tv_address.setText(addressDto.getSpecific_address()+", "+addressDto.getWard()+", "+addressDto.getDistrict()+", "+addressDto.getProvince());
                                break;
                            }
 
@@ -333,16 +333,17 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             }
         });
 
-        couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), PaymentActivity.this, positionVoucherItemSelected);
+       couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), PaymentActivity.this, positionVoucherItemSelected);
+        //couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), PaymentActivity.this);
         rcv_coupon.setAdapter(couponCheckboxAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         rcv_coupon.setLayoutManager(layoutManager);
 
         btn_Apply.setOnClickListener( v -> {
-            couponDetail = couponCheckboxAdapter.getCouponSelected();
-            voucherDiscountPercent = couponDetail.getCoupon().getDiscountPercent();  // get voucher discount percent
+            redeemedCoupon = couponCheckboxAdapter.getCouponSelected();
+            voucherDiscountPercent = redeemedCoupon.getCoupon().getDiscountPercent();  // get voucher discount percent
             positionVoucherItemSelected = couponCheckboxAdapter.getPositionVoucherSelected(); // get position of voucher selected
-            handlerApplyCoupon(couponDetail);
+            handlerApplyCoupon(redeemedCoupon);
 
             dialog.dismiss();
         });
@@ -399,33 +400,28 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         dialog.getWindow().setGravity(Gravity.BOTTOM);
     }
 
-    public List<CouponDetail> getCoupons() {
+    public List<RedeemedCouponDTO> getCoupons() {
         CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<CouponDetail>> call = couponService.getCoupon();
+        Call<List<RedeemedCouponDTO>> call = couponService.getRedeemedCoupons();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        Future<List<CouponDetail>> future = executorService.submit(new Callable<List<CouponDetail>>() {
-            @Override
-            public List<CouponDetail> call() throws Exception {
-                try {
-                    Response<List<CouponDetail>> response = call.execute();
-                    if (response.isSuccessful()) {
-                        return response.body();
-                    } else if (response.code() == 401) {
-                        // Xử lý khi mã trạng thái là 401 (Unauthorized)
-                        // Ví dụ: chuyển đến màn hình đăng nhập
-                        Intent intent = new Intent(mContext, LoginActivity.class);
-                        finish();
-                        mContext.startActivity(intent);
-                        return null;
-                    } else {
-                        Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
-                        return null;
-                    }
-                } catch (IOException e) {
-                    Toast.makeText(mContext, "A connection error occurred", Toast.LENGTH_LONG).show();
+        Future<List<RedeemedCouponDTO>> future = executorService.submit(() -> {
+            try {
+                Response<List<RedeemedCouponDTO>> response = call.execute();
+                if (response.isSuccessful()) {
+                    return response.body();
+                } else if (response.code() == 401) {
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    finish();
+                    mContext.startActivity(intent);
+                    return null;
+                } else {
+                    Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
                     return null;
                 }
+            } catch (IOException e) {
+                Toast.makeText(mContext, "A connection error occurred", Toast.LENGTH_LONG).show();
+                return null;
             }
         });
 
@@ -438,14 +434,14 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         }
     }
 
-    public void handlerApplyCoupon(CouponDetail couponDetail) {
-        if(couponDetail != null){
+    public void handlerApplyCoupon(RedeemedCouponDTO redeemedCoupon) {
+        if(redeemedCoupon != null){
             tv_voucherCode.setVisibility(TextView.VISIBLE);
             tv_addVoucher.setVisibility(TextView.GONE);
-            tv_voucherCode.setText( couponDetail.getCoupon().getCode()); // display coupon code
+            tv_voucherCode.setText( redeemedCoupon.getCode()); // display coupon code
             int total = Convert.convertCurrencyFormat(tv_totalPrice.getText().toString().trim()); // get total price
             int totalProductDiscount = Convert.convertCurrencyFormat(tv_productDiscount.getText().toString().trim()); // get total product discount
-            int totalVoucherDiscount = couponDetail.getCoupon().getDiscountPercent() * total / 100; // calculate voucher discount
+            int totalVoucherDiscount = redeemedCoupon.getCoupon().getDiscountPercent() * total / 100; // calculate voucher discount
             int totalAmountCart = total - totalVoucherDiscount - totalProductDiscount; // calculate total amount
             int totalDiscount = totalProductDiscount + totalVoucherDiscount;
             tv_totalDiscount.setText(Convert.convertPrice(totalDiscount));
@@ -468,10 +464,10 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     public void onVoucherItemClick(int position) {
         if(position == -1 && txt_input_code.getText().toString().isEmpty()){
             btn_Apply.setEnabled(false);
-            couponDetail = couponCheckboxAdapter.getCouponSelected();
+            redeemedCoupon = couponCheckboxAdapter.getCouponSelected();
             voucherDiscountPercent = 0;
             positionVoucherItemSelected = -1;
-            handlerApplyCoupon(couponDetail);
+            handlerApplyCoupon(redeemedCoupon);
         }
         if(position != -1){
             btn_Apply.setEnabled(true);

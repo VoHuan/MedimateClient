@@ -196,6 +196,7 @@
                     android:layout_height="1dp"
                     android:background="@color/gray" />
                 <!--                        recycle view -->
+
                 <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -217,6 +218,43 @@
                     android:layout_height="6dp"
                     android:background="@color/gray" />
 
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginHorizontal="18dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp">
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mã khuyến mãi "
+                        android:textSize="16dp"
+                        android:textStyle="bold" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+
+                    <TextView
+                        android:id="@+id/tv_couponCode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="KM12"
+                        android:textAlignment="viewEnd"
+                        android:textColor="@color/header_color"
+                        android:textSize="16dp" />
+
+
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:background="@color/gray" />
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -224,14 +262,12 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp">
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginStart="18dp"
+                        android:textStyle="bold"
                         android:text="Chi tiết thanh toán"
                         android:textSize="18dp" />
 
@@ -243,15 +279,12 @@
                     android:orientation="horizontal"
                     android:paddingBottom="4dp">
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Tiền hàng"
+                        android:layout_marginStart="18dp"
+                        android:text="Tổng tiền"
                         android:textSize="16dp" />
 
                     <TextView
@@ -259,13 +292,86 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginEnd="18dp"
                         android:text="0đ"
                         android:textAlignment="viewEnd"
                         android:textSize="16dp" />
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="18dp"
+                        android:text="Tổng giảm sản phẩm"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:id="@+id/tv_totalDiscountProduct"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="18dp"
+                        android:text="0đ"
+                        android:textAlignment="viewEnd"
+                        android:textSize="16dp" />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="18dp"
+                        android:text="Tổng giảm voucher"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:id="@+id/tv_totalDiscountCoupon"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="18dp"
+                        android:text="0đ"
+                        android:textAlignment="viewEnd"
+                        android:textSize="16dp" />
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="4dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="18dp"
+                        android:text="Tổng tiền khuyến mãi"
+                        android:textSize="16dp" />
+
+                    <TextView
+                        android:id="@+id/tv_totalDiscount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="18dp"
+                        android:text="0đ"
+                        android:textAlignment="viewEnd"
+                        android:textSize="16dp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -274,14 +380,11 @@
                     android:orientation="horizontal"
                     android:paddingBottom="4dp">
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginStart="18dp"
                         android:text="Phí vận chuyển"
                         android:textSize="16dp" />
 
@@ -290,12 +393,10 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="0đ"
+                        android:layout_marginEnd="18dp"
                         android:textAlignment="viewEnd"
                         android:textSize="16dp" />
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -304,16 +405,13 @@
                     android:orientation="horizontal"
                     android:paddingBottom="8dp">
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="Tổng thanh toán"
                         android:textColor="@color/minus_color"
+                        android:layout_marginStart="18dp"
                         android:textSize="16dp"
                         android:textStyle="bold" />
 
@@ -325,12 +423,9 @@
                         android:text="0đ"
                         android:textAlignment="viewEnd"
                         android:textColor="@color/minus_color"
+                        android:layout_marginEnd="18dp"
                         android:textSize="16dp"
                         android:textStyle="bold" />
-
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
 
                 </LinearLayout>
 
@@ -349,14 +444,11 @@
                     android:orientation="horizontal"
                     android:paddingBottom="8dp">
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
-
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_marginStart="18dp"
                         android:text="Tổng điểm nhận được"
                         android:textSize="16dp" />
 
@@ -369,11 +461,9 @@
                         android:textColor="@color/coin_color"
                         android:textStyle="bold"
                         android:textAlignment="viewEnd"
+                        android:layout_marginEnd="18dp"
                         android:textSize="16dp" />
 
-                    <Space
-                        android:layout_width="18dp"
-                        android:layout_height="wrap_content" />
                 </LinearLayout>
 
                 <View
@@ -501,7 +591,12 @@
                 <Space
                     android:layout_width="match_parent"
                     android:layout_height="14dp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:background="@color/gray" />
             </LinearLayout>
+
         </ScrollView>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

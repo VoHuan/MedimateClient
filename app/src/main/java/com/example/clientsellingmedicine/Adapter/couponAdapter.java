@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonExchangeCouponClickListener;
-import com.example.clientsellingmedicine.DTO.Coupon;
+import com.example.clientsellingmedicine.DTO.CouponDTO;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -21,11 +21,11 @@ import java.util.List;
 
 
 public class couponAdapter extends RecyclerView.Adapter<couponAdapter.ViewHolder> {
-    private List<Coupon> mCoupons;
+    private List<CouponDTO> mCoupons;
     private Context mContext;
 
     private IOnButtonExchangeCouponClickListener mListener;
-    public couponAdapter(List<Coupon> list,IOnButtonExchangeCouponClickListener listener) {
+    public couponAdapter(List<CouponDTO> list, IOnButtonExchangeCouponClickListener listener) {
         this.mCoupons = list;
         this.mListener = listener;
     }
@@ -43,7 +43,7 @@ public class couponAdapter extends RecyclerView.Adapter<couponAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Coupon coupon = mCoupons.get(position);
+        CouponDTO coupon = mCoupons.get(position);
         if (coupon == null) {
             return;
         }
@@ -51,7 +51,7 @@ public class couponAdapter extends RecyclerView.Adapter<couponAdapter.ViewHolder
 
         holder.tvNameDiscountItem.setText(coupon.getDescription());
         // Expire date = current date + expire date
-        Integer expire_date = coupon.getExpirationTime();
+        Integer expire_date = coupon.getUsageDays();
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, expire_date);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");

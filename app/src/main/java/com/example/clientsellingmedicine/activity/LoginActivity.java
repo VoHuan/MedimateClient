@@ -162,6 +162,7 @@ public class LoginActivity extends AppCompatActivity {
                     Token token = response.body();
                     SharedPref.saveToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN, token);
                     Intent intent = new Intent(mContext, MainActivity.class);
+                    finish();
                     startActivity(intent);
 
                 } else if (response.code() == 401) {

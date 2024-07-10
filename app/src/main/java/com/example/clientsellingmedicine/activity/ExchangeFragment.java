@@ -14,14 +14,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.Adapter.couponAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonExchangeCouponClickListener;
-import com.example.clientsellingmedicine.DTO.Coupon;
-import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.CouponDTO;
+import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
@@ -92,8 +94,7 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
                     // Set point
                     tvPoints.setText(String.valueOf(user.getPoint()));
                 } else if(response.code() == 401) {
-                    Intent intent = new Intent(mContext, LoginActivity.class);
-                    startActivity(intent);
+                    navigateToLogin();
                 } else {
                     Toast.makeText(mContext, "Failed to retrieve points", Toast.LENGTH_LONG).show();
                 }
@@ -111,11 +112,11 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
     }
     private void getCoupons(){
         CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<Coupon>> request = couponService.getCoupons();
+        Call<List<CouponDTO>> request = couponService.getCoupons();
 
-        request.enqueue(new Callback<List<Coupon>>() {
+        request.enqueue(new Callback<List<CouponDTO>>() {
             @Override
-            public void onResponse(Call<List<Coupon>> call, Response<List<Coupon>> response) {
+            public void onResponse(Call<List<CouponDTO>> call, Response<List<CouponDTO>> response) {
                 if(response.isSuccessful()){
                     if(response.body().size()>0){
                         couponAdapter = new couponAdapter(response.body(), ExchangeFragment.this);
@@ -126,14 +127,14 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
                     }
 
                 } else if(response.code() == 401) {
-
+                    navigateToLogin();
                 } else {
                     Toast.makeText(mContext, "Something was wrong", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Coupon>> call, Throwable t) {
+            public void onFailure(Call<List<CouponDTO>> call, Throwable t) {
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
@@ -144,7 +145,7 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
     }
 
     @Override
-    public void onButtonExchangeCouponItemClick(Coupon coupon) {
+    public void onButtonExchangeCouponItemClick(CouponDTO coupon) {
         Integer point = user.getPoint();
         if(point < coupon.getPoint()){
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(mContext);
@@ -158,18 +159,30 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
                     })
                     .show();
         }else {
-            exchangeCoupon(coupon);
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(mContext);
+            builder.setIcon(R.drawable.ic_warning) // Đặt icon của Dialog
+                    .setTitle("Xác nhận")
+                    .setMessage("Bạn muốn quy đổi mã giảm giá này chứ!")
+                    .setCancelable(false) // Bấm ra ngoài không mất dialog
+                    .setPositiveButton("OK", (dialog, which) -> {
+                        exchangeCoupon(coupon);
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> {
+                        // Xử lý khi nhấn nút Cancel
+                    })
+                    .show();
+
         }
 
     }
 
-    public void exchangeCoupon(Coupon coupon){
+    public void exchangeCoupon(CouponDTO coupon){
         CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<CouponDetail> request = couponService.exchangeCoupon(coupon);
+        Call<RedeemedCouponDTO> request = couponService.exchangeCoupon(coupon);
 
-        request.enqueue(new Callback<CouponDetail>() {
+        request.enqueue(new Callback<RedeemedCouponDTO>() {
             @Override
-            public void onResponse(Call<CouponDetail> call, Response<CouponDetail> response) {
+            public void onResponse(Call<RedeemedCouponDTO> call, Response<RedeemedCouponDTO> response) {
                 if(response.isSuccessful()){
                     getPoints();
                     NotificationHelper notificationHelper = new NotificationHelper(mContext);
@@ -183,7 +196,7 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
             }
 
             @Override
-            public void onFailure(Call<CouponDetail> call, Throwable t) {
+            public void onFailure(Call<RedeemedCouponDTO> call, Throwable t) {
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
@@ -192,4 +205,12 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
             }
         });
     }
+
+
+    public void navigateToLogin() {
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
 }

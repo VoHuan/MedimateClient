@@ -3,17 +3,18 @@ package com.example.clientsellingmedicine.DTO;
 import java.io.Serializable;
 import java.util.Date;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class CouponDetail implements Serializable {
+@AllArgsConstructor
+public class RedeemedCouponDTO implements Serializable {
     private Integer id;
-    private Integer idUser;
-    private Integer idOrder;
-    private Date startTime;
-    private Date endTime;
+    private CouponDTO coupon;
+    private String code;
+    private UserDTO user;
+    private Date expiryDate;
     private Integer status;
-    private Coupon coupon;
 }

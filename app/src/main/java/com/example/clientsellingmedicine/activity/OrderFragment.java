@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.orderAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnOrderItemClickListener;
-import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
 
 import com.example.clientsellingmedicine.services.OrderService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
@@ -57,7 +57,7 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
 
     HorizontalScrollView horizontal_statusOrder;
 
-    private static List<Order> listOrder; //list order for search status
+    private static List<OrderDTO> listOrder; //list order for search status
 
     public OrderFragment() {
         // Required empty public constructor
@@ -142,9 +142,9 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
                     layout_processingStatus.setBackgroundResource(R.drawable.order_selection_background);
                     if (listOrder != null) {
                         //get orders delivered
-                        List<Order> ordersDelivered = listOrder.stream()
+                        List<OrderDTO> ordersDelivered = listOrder.stream()
                                 .filter(order -> order.getStatus() == 2)
-                                .sorted(Comparator.comparing(Order::getOrderTime).reversed())
+                                .sorted(Comparator.comparing(OrderDTO::getOrderTime).reversed())
                                 .collect(Collectors.toList());
 
                         orderAdapter.setListOrder(ordersDelivered);
@@ -154,9 +154,9 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
                     layout_inTransitStatus.setBackgroundResource(R.drawable.order_selection_background);
                     if (listOrder != null) {
                         //get orders delivered
-                        List<Order> ordersDelivered = listOrder.stream()
+                        List<OrderDTO> ordersDelivered = listOrder.stream()
                                 .filter(order -> order.getStatus() == 3)
-                                .sorted(Comparator.comparing(Order::getOrderTime).reversed())
+                                .sorted(Comparator.comparing(OrderDTO::getOrderTime).reversed())
                                 .collect(Collectors.toList());
 
                         orderAdapter.setListOrder(ordersDelivered);
@@ -167,9 +167,9 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
                     layout_deliveredStatus.setBackgroundResource(R.drawable.order_selection_background);
                     if (listOrder != null) {
                         //get orders delivered
-                        List<Order> ordersDelivered = listOrder.stream()
+                        List<OrderDTO> ordersDelivered = listOrder.stream()
                                 .filter(order -> order.getStatus() == 1)
-                                .sorted(Comparator.comparing(Order::getOrderTime).reversed())
+                                .sorted(Comparator.comparing(OrderDTO::getOrderTime).reversed())
                                 .collect(Collectors.toList());
 
                         orderAdapter.setListOrder(ordersDelivered);
@@ -180,9 +180,9 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
                     layout_cancelledStatus.setBackgroundResource(R.drawable.order_selection_background);
                     if (listOrder != null) {
                         //get orders cancelled
-                        List<Order> ordersCancelled = listOrder.stream()
+                        List<OrderDTO> ordersCancelled = listOrder.stream()
                                 .filter(order -> order.getStatus() == 0)
-                                .sorted(Comparator.comparing(Order::getOrderTime).reversed())
+                                .sorted(Comparator.comparing(OrderDTO::getOrderTime).reversed())
                                 .collect(Collectors.toList());
 
                         orderAdapter.setListOrder(ordersCancelled);
@@ -210,15 +210,15 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
 
     public void getOrders() {
         OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<List<Order>> request = orderService.getOrders();
+        Call<List<OrderDTO>> request = orderService.getOrders();
 
-        request.enqueue(new Callback<List<Order>>() {
+        request.enqueue(new Callback<List<OrderDTO>>() {
             @Override
-            public void onResponse(Call<List<Order>> call, Response<List<Order>> response) {
+            public void onResponse(Call<List<OrderDTO>> call, Response<List<OrderDTO>> response) {
                 if (response.isSuccessful()) {
                     listOrder = new ArrayList<>();
                     listOrder = response.body().stream() //get list order
-                            .sorted(Comparator.comparing(Order::getOrderTime).reversed())  // sort by date
+                            .sorted(Comparator.comparing(OrderDTO::getOrderTime).reversed())  // sort by date
                             .collect(Collectors.toList());
                     if(listOrder != null && listOrder.size() > 0) {
                         // add list order to recycle view
@@ -240,7 +240,7 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
             }
 
             @Override
-            public void onFailure(Call<List<Order>> call, Throwable t) {
+            public void onFailure(Call<List<OrderDTO>> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
@@ -276,7 +276,7 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
     }
 
     @Override
-    public void onItemClick(Order order) {
+    public void onItemClick(OrderDTO order) {
         Intent intent = new Intent(mContext, OrderDetailActivity.class);
         intent.putExtra("order", order);
         startActivity(intent);

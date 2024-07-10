@@ -87,18 +87,13 @@
             android:layout_height="2dp"
             android:background="@color/disable" />
         <!--        list coupon item-->
-        <ScrollView
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_coupon"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="58dp">
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rcv_coupon"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-            </androidx.recyclerview.widget.RecyclerView>
-        </ScrollView>
+            android:layout_height="match_parent"
+            android:layout_marginBottom="60dp"
+            android:orientation="horizontal"></androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>
     <!--        button apply-->
@@ -117,11 +112,11 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginStart="30dp"
-            android:layout_marginEnd="30dp"
             android:layout_marginTop="10dp"
+            android:layout_marginEnd="30dp"
             android:background="@drawable/btn_confirm"
-            android:text="Áp dụng"
             android:enabled="false"
+            android:text="Áp dụng"
             android:textAlignment="center"
             android:textAllCaps="false"
             android:textColor="@color/white"

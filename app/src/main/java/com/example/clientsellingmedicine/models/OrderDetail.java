@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.DTO;
+package com.example.clientsellingmedicine.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +11,6 @@ public class OrderDetail {
     private Integer discountPrice;
     private Integer productPrice;
     private Integer quantity;
-    private Product product;
-    private Order orders;
+    private Integer productId;
+    private Integer orderId;
 }

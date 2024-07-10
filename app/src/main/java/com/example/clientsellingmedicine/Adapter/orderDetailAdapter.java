@@ -1,6 +1,7 @@
 package com.example.clientsellingmedicine.Adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.OrderDetail;
+import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;
@@ -20,11 +21,11 @@ import java.util.List;
 
 
 public class orderDetailAdapter extends RecyclerView.Adapter <orderDetailAdapter.ViewHolder> {
-    private List<OrderDetail> mProducts;
+    private List<OrderDetailDTO> mProducts;
     private Context mContext;
 
 
-    public orderDetailAdapter(List<OrderDetail> list) {
+    public orderDetailAdapter(List<OrderDetailDTO> list) {
         this.mProducts = list;
     }
 
@@ -41,7 +42,7 @@ public class orderDetailAdapter extends RecyclerView.Adapter <orderDetailAdapter
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        OrderDetail orderItem = mProducts.get(position);
+        OrderDetailDTO orderItem = mProducts.get(position);
         if (orderItem == null) {
             return;
         }
@@ -53,7 +54,7 @@ public class orderDetailAdapter extends RecyclerView.Adapter <orderDetailAdapter
 
         holder.tvNameCartItem.setText(orderItem.getProduct().getName());
         holder.tvUnit.setText(orderItem.getProduct().getUnit().getName());
-        holder.tvPriceCartItem.setText(Convert.convertPrice(orderItem.getProduct().getPrice()));
+        holder.tvPriceCartItem.setText(Convert.convertPrice(orderItem.getProductPrice()));
         holder.tvQuantity.setText(String.valueOf(orderItem.getQuantity()));
     }
 

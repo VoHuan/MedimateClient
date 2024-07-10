@@ -1,7 +1,7 @@
 package com.example.clientsellingmedicine.interfaces;
 
-import com.example.clientsellingmedicine.DTO.Coupon;
+import com.example.clientsellingmedicine.DTO.CouponDTO;
 
 public interface IOnButtonExchangeCouponClickListener {
-    void onButtonExchangeCouponItemClick(Coupon coupon);
+    void onButtonExchangeCouponItemClick(CouponDTO coupon);
 }

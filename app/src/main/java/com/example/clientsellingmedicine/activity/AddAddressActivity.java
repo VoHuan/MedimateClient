@@ -50,6 +50,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import retrofit2.Call;
@@ -133,14 +134,14 @@ public class AddAddressActivity extends AppCompatActivity {
             // set text for button
             btn_add_address.setText("Cập nhật");
             // set data for address update screen
-            txt_input_name.setText(address.getFullName().trim());
+            txt_input_name.setText(address.getUser_name().trim());
             txt_input_phone.setText(address.getPhone().trim());
             txt_input_province.setText(address.getProvince());
             txt_input_district.setEnabled(true);
             txt_input_district.setText(address.getDistrict());
             txt_input_ward.setEnabled(true);
             txt_input_ward.setText(address.getWard());
-            txt_input_specificAddress.setText(address.getSpecificAddress().trim());
+            txt_input_specificAddress.setText(address.getSpecific_address().trim());
             String type = address.getType();
             if (type.equals("Nhà riêng")) {
                 rb_home.setChecked(true);
@@ -148,7 +149,7 @@ public class AddAddressActivity extends AppCompatActivity {
                 rb_company.setChecked(true);
             }
 
-            if (address.getIsDefault()) {
+            if (address.getIs_default()) {
                 swt_default_address.setChecked(true);
                 isDefaultAddress = true;
             } else {
@@ -165,6 +166,15 @@ public class AddAddressActivity extends AppCompatActivity {
             }
             if (txt_input_phone_layout.getEditText().getText().toString().trim().isEmpty()) {
                 txt_input_phone_layout.setError("Vui lòng nhập số điện thoại");
+                return;
+            }
+            // validate phone number
+            String phoneNumber = txt_input_phone_layout.getEditText().getText().toString().trim();
+            String phoneRegex = "^(0[3|5|7|8|9])+([0-9]{8})$";
+            Pattern pattern = Pattern.compile(phoneRegex);
+            Matcher matcher = pattern.matcher(phoneNumber);
+            if (!matcher.matches()) {
+                txt_input_phone_layout.setError("Số điện thoại không hợp lệ");
                 return;
             }
             if (txt_input_province_layout.getEditText().getText().toString().trim().isEmpty()) {
@@ -187,30 +197,30 @@ public class AddAddressActivity extends AppCompatActivity {
             if (address != null) {
                 // update address
                 address.setId(address.getId());
-                address.setIdUser(address.getIdUser());
-                address.setFullName(txt_input_name.getText().toString());
+                address.setId_user(address.getId_user());
+                address.setUser_name(txt_input_name.getText().toString());
                 address.setPhone(txt_input_phone.getText().toString());
                 address.setProvince(txt_input_province.getText().toString());
                 address.setDistrict(txt_input_district.getText().toString());
                 address.setWard(txt_input_ward.getText().toString());
-                address.setSpecificAddress(txt_input_specificAddress.getText().toString());
+                address.setSpecific_address(txt_input_specificAddress.getText().toString());
                 address.setType(rb_home.isChecked() ? "Nhà riêng" : "Công ty");
-                address.setIsDefault(swt_default_address.isChecked());
+                address.setIs_default(swt_default_address.isChecked());
                 updateAddress(address);
             } else {
                 // get id user
                 UserDTO user = getUser();
                 // add new address
                 AddressDto addressNew = new AddressDto();
-                addressNew.setIdUser(user.getId());
-                addressNew.setFullName(txt_input_name.getText().toString());
+                addressNew.setId_user(user.getId());
+                addressNew.setUser_name(txt_input_name.getText().toString());
                 addressNew.setPhone(txt_input_phone.getText().toString());
                 addressNew.setProvince(txt_input_province.getText().toString());
                 addressNew.setDistrict(txt_input_district.getText().toString());
                 addressNew.setWard(txt_input_ward.getText().toString());
-                addressNew.setSpecificAddress(txt_input_specificAddress.getText().toString());
+                addressNew.setSpecific_address(txt_input_specificAddress.getText().toString());
                 addressNew.setType(rb_home.isChecked() ? "Nhà riêng" : "Công ty");
-                addressNew.setIsDefault(swt_default_address.isChecked());
+                addressNew.setIs_default(swt_default_address.isChecked());
                 addNewAddress(addressNew);
             }
         });
@@ -297,11 +307,11 @@ public class AddAddressActivity extends AppCompatActivity {
 
     public void addNewAddress(AddressDto addressDto) {
         AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<ResponseDto> request = addressService.addAddress(addressDto);
-        request.enqueue(new Callback<ResponseDto>() {
+        Call<AddressDto> request = addressService.addAddress(addressDto);
+        request.enqueue(new Callback<AddressDto>() {
 
             @Override
-            public void onResponse(Call<ResponseDto> call, Response<ResponseDto> response) {
+            public void onResponse(Call<AddressDto> call, Response<AddressDto> response) {
                 if (response.isSuccessful()) {
                     Intent resultIntent = new Intent();
                     // Đặt dữ liệu trả về vào intent nếu cần
@@ -309,20 +319,19 @@ public class AddAddressActivity extends AppCompatActivity {
                     finish();
 
                 } else if (response.code() == 401) {
-                    Toast.makeText(mContext, "Your session has expired", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
                 } else {
                     Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
                 }
             }
-
-            @SuppressLint("SuspiciousIndentation")
             @Override
-            public void onFailure(Call<ResponseDto> call, Throwable t) {
+            public void onFailure(Call<AddressDto> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else
-                    Log.d("TAG", "onFailure: " + t.getMessage());
-                Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -342,9 +351,13 @@ public class AddAddressActivity extends AppCompatActivity {
                     finish();
 
                 } else if (response.code() == 401) {
-                    Toast.makeText(mContext, "Your session has expired", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                } else if (response.code() == 400) {
+                    Toast.makeText(mContext, "Invalid input data", Toast.LENGTH_LONG).show();
+                }else {
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -354,8 +367,7 @@ public class AddAddressActivity extends AppCompatActivity {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else
-                    Log.d("TAG", "onFailure: " + t.getMessage());
-                Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
             }
         });
     }

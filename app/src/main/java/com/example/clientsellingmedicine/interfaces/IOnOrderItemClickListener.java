@@ -1,7 +1,7 @@
 package com.example.clientsellingmedicine.interfaces;
 
-import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
 
 public interface IOnOrderItemClickListener {
-    void onItemClick(Order order);
+    void onItemClick(OrderDTO order);
 }

@@ -12,19 +12,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnOrderItemClickListener;
-import com.example.clientsellingmedicine.DTO.Order;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;
 
 public class orderAdapter extends RecyclerView.Adapter<orderAdapter.ViewHolder> {
-    List<Order> listOrder;
+    List<OrderDTO> listOrder;
 
     private Context mContext;
+    private static final int SUCCESS_STATUS = 1;
+    private static final int FAILED_STATUS = 0;
+    private static final int PENDING_STATUS = 2;
+    private static final int SHIPPING_STATUS = 3;
 
     private IOnOrderItemClickListener listener;
 
-    public orderAdapter(List<Order> listOrder,IOnOrderItemClickListener listener) {
+    public orderAdapter(List<OrderDTO> listOrder, IOnOrderItemClickListener listener) {
         this.listOrder = listOrder;
         this.listener = listener;
     }
@@ -57,31 +61,28 @@ public class orderAdapter extends RecyclerView.Adapter<orderAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull orderAdapter.ViewHolder holder, int position) {
-        Order order = (Order) listOrder.get(position);
+        OrderDTO order = (OrderDTO) listOrder.get(position);
         if(order == null){
             return;
         }
         holder.tvOrderCode.setText(order.getCode());
         String price = Convert.convertPrice(order.getTotal());
         holder.tvTotalPrice.setText(price);
-        String date = order.getOrderTime().toString();
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-             date = Convert.convertToDate(order.getOrderTime().toString());
-        }
+        String date = Convert.convertToDate(order.getOrderTime().toString());
         holder.tvAddress.setText(date);
-        if(order.getStatus() == 1){
+        if(order.getStatus() == SUCCESS_STATUS){
             holder.orderStatus.setText("Thành công");
             holder.statusBackground.setBackgroundResource(R.drawable.success_background);
         }
-        else if(order.getStatus() == 0){
+        else if(order.getStatus() == FAILED_STATUS){
             holder.orderStatus.setText("Thất bại");
             holder.statusBackground.setBackgroundResource(R.drawable.dicount_background);
         }
-        else if(order.getStatus() == 2){
+        else if(order.getStatus() == PENDING_STATUS){
             holder.orderStatus.setText("Chờ xử lý");
             holder.statusBackground.setBackgroundResource(R.drawable.pending_background);
         }
-        else if(order.getStatus() == 3){
+        else if(order.getStatus() == SHIPPING_STATUS){
             holder.orderStatus.setText("Đang giao");
             holder.statusBackground.setBackgroundResource(R.drawable.shipping_background);
         }
@@ -95,7 +96,7 @@ public class orderAdapter extends RecyclerView.Adapter<orderAdapter.ViewHolder> 
         return listOrder.size();
     }
 
-    public void setListOrder(List<Order> listOrder) {
+    public void setListOrder(List<OrderDTO> listOrder) {
         this.listOrder = listOrder;
         notifyDataSetChanged();
     }

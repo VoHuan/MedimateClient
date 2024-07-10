@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.Order;
-import com.example.clientsellingmedicine.DTO.OrderDetail;
+import com.example.clientsellingmedicine.DTO.OrderDTO;
+import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
 import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.Adapter.orderDetailAdapter;
 import com.example.clientsellingmedicine.services.OrderService;
@@ -34,7 +34,8 @@ import retrofit2.Response;
 public class OrderDetailActivity extends AppCompatActivity {
     private Context mContext;
     private TextView tv_userName, tv_Phone, tv_Address, tv_orderTime,
-            tv_totalPrice, tv_orderCode, tv_paymentMethod, tv_totalPoint, tv_totalPayment;
+            tv_totalPrice, tv_orderCode, tv_paymentMethod, tv_totalPoint, tv_totalPayment,
+            tv_couponCode, tv_totalDiscountProduct, tv_totalDiscountCoupon, tv_totalDiscount;
     private ImageView iv_back;
     private RecyclerView rcvOrderDetail;
 
@@ -71,6 +72,10 @@ public class OrderDetailActivity extends AppCompatActivity {
         tv_paymentMethod = findViewById(R.id.tv_paymentMethod);
         tv_totalPoint = findViewById(R.id.tv_totalPoint);
         tv_totalPayment = findViewById(R.id.tv_totalPayment);
+        tv_couponCode = findViewById(R.id.tv_couponCode);
+        tv_totalDiscountProduct = findViewById(R.id.tv_totalDiscountProduct);
+        tv_totalDiscountCoupon = findViewById(R.id.tv_totalDiscountCoupon);
+        tv_totalDiscount = findViewById(R.id.tv_totalDiscount);
 
         rcvOrderDetail = findViewById(R.id.rcvOrderDetail);
 
@@ -78,80 +83,54 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private void loadData() {
         Intent intent = getIntent();
-        Order order = (Order) intent.getSerializableExtra("order");
+        OrderDTO order = (OrderDTO) intent.getSerializableExtra("order");
         if (order != null) {
-            getUserInfo(); // get user name and phone number
+            displayUserInfor(order.getUser());
             getOrderItems(order.getId()); // get order items and total price
             tv_Address.setText(order.getUserAddress());
-            String orderTime = order.getOrderTime().toString();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                orderTime = Convert.convertToDate(orderTime);
-            }
+            String orderTime = Convert.convertToDate(order.getOrderTime().toString());
             tv_orderTime.setText(orderTime);
             tv_orderCode.setText(order.getCode());
+            tv_totalDiscountProduct.setText(Convert.convertPrice(order.getTotalProductDiscount()));
+            tv_totalDiscountCoupon.setText(Convert.convertPrice(order.getTotalCouponDiscount()));
+            tv_totalDiscount.setText(Convert.convertPrice(order.getTotalDiscount()));
+            tv_couponCode.setText(order.getRedeemed_coupons().getCode());
             tv_paymentMethod.setText(order.getPaymentMethod());
             tv_totalPoint.setText("+"+order.getPoint().toString());
             tv_totalPayment.setText(Convert.convertPrice(order.getTotal()));
         }
     }
 
-
-    public void getUserInfo() {
-        UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<UserDTO> request = userService.getUser();
-        request.enqueue(new Callback<UserDTO>() {
-
-            @Override
-            public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
-                if (response.isSuccessful()) {
-                    UserDTO user = response.body();
-                    if(user.getUsername() != null ){
-                        tv_userName.setText(user.getUsername());
-                    }else if(user.getPhone() != null) {
-                        tv_userName.setText(user.getPhone());
-                    }else {
-                        tv_userName.setText(user.getEmail());
-                    }
-
-                    tv_Phone.setText(user.getPhone());
-                } else if (response.code() == 401) {
-                    Intent intent = new Intent(mContext, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @SuppressLint("SuspiciousIndentation")
-            @Override
-            public void onFailure(Call<UserDTO> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
-                } else
-                    Log.d("TAG", "onFailure: " + t.getMessage());
-                Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
-            }
-        });
+public  void displayUserInfor(UserDTO user){
+    if(user.getUsername() != null ){
+        tv_userName.setText(user.getUsername());
+    }else if(user.getPhone() != null) {
+        tv_userName.setText(user.getPhone());
+    }else {
+        tv_userName.setText(user.getEmail());
     }
+
+    tv_Phone.setText(user.getPhone());
+}
+
 
     public void getOrderItems(Integer orderId) {
         OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<List<OrderDetail>> request = orderService.getOrderItem(orderId);
-        request.enqueue(new Callback<List<OrderDetail>>() {
+        Call<List<OrderDetailDTO>> request = orderService.getOrderItem(orderId);
+        request.enqueue(new Callback<List<OrderDetailDTO>>() {
 
             @Override
-            public void onResponse(Call<List<OrderDetail>> call, Response<List<OrderDetail>> response) {
+            public void onResponse(Call<List<OrderDetailDTO>> call, Response<List<OrderDetailDTO>> response) {
                 if (response.isSuccessful()) {
-                    List<OrderDetail> orderItems = response.body();
+                    List<OrderDetailDTO> orderItems = response.body();
                     orderDetailAdapter = new orderDetailAdapter(orderItems);
                     rcvOrderDetail.setAdapter(orderDetailAdapter );
                     rcvOrderDetail.setLayoutManager(new LinearLayoutManager(mContext));
 
                     // calculate total price
                     Integer totalPrice = 0;
-                    for (OrderDetail orderItem : orderItems) {
-                        totalPrice+= orderItem.getQuantity() * orderItem.getProduct().getPrice();
+                    for (OrderDetailDTO orderItem : orderItems) {
+                        totalPrice+= orderItem.getQuantity() * orderItem.getProductPrice();
                     }
                     tv_totalPrice.setText(Convert.convertPrice(totalPrice)); // set total price
 
@@ -159,10 +138,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                     Toast.makeText(mContext, "Something was wrong", Toast.LENGTH_LONG).show();
                 }
             }
-
-            @SuppressLint("SuspiciousIndentation")
             @Override
-            public void onFailure(Call<List<OrderDetail>> call, Throwable t) {
+            public void onFailure(Call<List<OrderDetailDTO>> call, Throwable t) {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else

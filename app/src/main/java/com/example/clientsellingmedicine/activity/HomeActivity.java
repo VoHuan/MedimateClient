@@ -52,14 +52,11 @@ public class HomeActivity extends AppCompatActivity {
         tvStatusRegister = findViewById(R.id.tvStatusRegister);
         btnReturnLogin = findViewById(R.id.btnReturnLogin);
         btnReturnRegiter = findViewById(R.id.btnReturnRegiter);
-        btnReturnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // function to handle register button click event
-                Intent i = new Intent(mContext, LoginActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-            }
+        btnReturnLogin.setOnClickListener(v -> {
+            // function to handle register button click event
+            Intent i = new Intent(mContext, LoginActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
         });
         btnReturnRegiter.setOnClickListener(new View.OnClickListener() {
             @Override

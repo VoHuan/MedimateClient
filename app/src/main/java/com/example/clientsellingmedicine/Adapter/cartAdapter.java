@@ -23,6 +23,7 @@ import com.example.clientsellingmedicine.models.CartItem;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 
@@ -131,8 +132,6 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
         holder.checkboxCartItem.setOnClickListener(v -> {
             if (holder.checkboxCartItem.isChecked()) {
-
-                Log.d("tag", "check item: " + cart.getProduct().getName() + " checked");
                 listCartItemsChecked.add(cart);
                 // Save CartItems Checked to SharedPreferences
                 SharedPref.saveData(holder.itemView.getContext(), listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
@@ -235,9 +234,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         // update CartItems for RecyclerView
         setListCartItems(listCartItems);
         // Remove item from CartItems Checked
-        Log.d("tag", "remove: " + listCartItemsChecked.size());
         listCartItemsChecked.remove(cartItem);
-        Log.d("tag", " after remove: " + listCartItemsChecked.size());
         // Save CartItems Checked to SharedPreferences
         SharedPref.saveData(mContext, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
 
@@ -257,7 +254,6 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
             return totalItem;
         for (CartItemDTO item: listCartItemsChecked) {
             total += item.getProduct().getPrice() * item.getQuantity();
-
             int discountPercent = item.getProduct().getDiscountPercent();
             int price = item.getProduct().getPrice()*item.getQuantity();
             totalProductDiscount+= (price * discountPercent) / 100;

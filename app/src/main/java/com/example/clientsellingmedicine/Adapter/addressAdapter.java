@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,14 +80,14 @@ public class addressAdapter extends RecyclerView.Adapter <addressAdapter.ViewHol
         if (address == null) {
             return;
         }
-        holder.tv_userName.setText(address.getFullName());
+        holder.tv_userName.setText(address.getUser_name());
         holder.tv_phoneNumber.setText(address.getPhone());
-        holder.tv_address.setText(address.getSpecificAddress() + ", " + address.getWard() + ", " + address.getDistrict() + ", " + address.getProvince());
+        holder.tv_address.setText(address.getSpecific_address() + ", " + address.getWard() + ", " + address.getDistrict() + ", " + address.getProvince());
         holder.tv_type_address.setText(address.getType());
 
 
 
-        if (address.getIsDefault()) {
+        if (address.getIs_default()) {
             holder.layout_is_default_address.setVisibility(View.VISIBLE);
         } else {
             holder.layout_is_default_address.setVisibility(View.GONE);
@@ -103,7 +104,7 @@ public class addressAdapter extends RecyclerView.Adapter <addressAdapter.ViewHol
         holder.tv_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(address.getIsDefault()){
+                if(address.getIs_default()){
                     MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(holder.itemView.getContext());
                     builder.setIcon(R.drawable.ic_warning) // Đặt icon của Dialog
                             .setTitle("Thông Báo")

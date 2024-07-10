@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.Adapter.redeemAdapter;
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 
@@ -66,15 +66,15 @@ public class RedeemFragment extends Fragment {
 
     private void getAllRedeemPointHistory() {
         CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<CouponDetail>> request = couponService.getAllCoupon();
+        Call<List<RedeemedCouponDTO>> request = couponService.getRedeemedCoupons();
 
-        request.enqueue(new Callback<List<CouponDetail>>() {
+        request.enqueue(new Callback<List<RedeemedCouponDTO>>() {
             @Override
-            public void onResponse(Call<List<CouponDetail>> call, Response<List<CouponDetail>> response) {
+            public void onResponse(Call<List<RedeemedCouponDTO>> call, Response<List<RedeemedCouponDTO>> response) {
                 if(response.isSuccessful()){
                     if(response.body().size() > 0){
                         redeemAdapter = new redeemAdapter(response.body().stream()
-                                .sorted(Comparator.comparing(CouponDetail::getStartTime).reversed())  // sort by date
+                                .sorted(Comparator.comparing(RedeemedCouponDTO::getExpiryDate).reversed())  // sort by date
                                 .collect(Collectors.toList()));
                         rcvAccumulatePointsHistory.setAdapter(redeemAdapter);
                         rcvAccumulatePointsHistory.setLayoutManager(new LinearLayoutManager(mContext));
@@ -85,12 +85,12 @@ public class RedeemFragment extends Fragment {
                 } else if(response.code() == 401) {
 
                 } else {
-                    Toast.makeText(mContext, "Something was wrong", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<List<CouponDetail>> call, Throwable t) {
+            public void onFailure(Call<List<RedeemedCouponDTO>> call, Throwable t) {
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {

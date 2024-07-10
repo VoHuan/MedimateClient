@@ -12,18 +12,18 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.R;
-import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.util.List;
 
 
 public class redeemAdapter extends RecyclerView.Adapter<redeemAdapter.ViewHolder> {
-    private List<CouponDetail> mCouponDetails;
+    private List<RedeemedCouponDTO> mCouponDetails;
     private Context mContext;
 
 
-    public redeemAdapter(List<CouponDetail> list) {
+    public redeemAdapter(List<RedeemedCouponDTO> list) {
         this.mCouponDetails = list;
     }
 
@@ -40,21 +40,17 @@ public class redeemAdapter extends RecyclerView.Adapter<redeemAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        CouponDetail couponDetail = mCouponDetails.get(position);
-        if (couponDetail == null) {
+        RedeemedCouponDTO redeemedCoupon = mCouponDetails.get(position);
+        if (redeemedCoupon == null) {
             return;
         }
 
 
         holder.tv_label_code.setText("Mã giảm giá:");
-        holder.tv_Code.setText(couponDetail.getCoupon().getCode());
-        // Expire date = current date + expire date
-        String time = couponDetail.getStartTime().toString();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            time = Convert.convertToDate(time);
-        }
+        holder.tv_Code.setText(redeemedCoupon.getCode());
+        String time = Convert.convertToDate(redeemedCoupon.getExpiryDate().toString());
         holder.tv_Time.setText(time);
-        holder.tv_Point.setText("  -" + couponDetail.getCoupon().getPoint());
+        holder.tv_Point.setText("  -" + redeemedCoupon.getCoupon().getPoint());
         holder.tv_Point.setTextColor(Color.parseColor("#FF0F00"));
 
     }

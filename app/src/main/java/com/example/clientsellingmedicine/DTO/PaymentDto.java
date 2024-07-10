@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class PaymentDto {
     private List<CartItemDTO> cartDetailDtoList;
     private Integer couponDetailId;
-    private Order order;
+    private OrderDTO order;
 }

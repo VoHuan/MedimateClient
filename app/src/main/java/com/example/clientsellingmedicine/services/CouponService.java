@@ -1,7 +1,7 @@
 package com.example.clientsellingmedicine.services;
 
-import com.example.clientsellingmedicine.DTO.Coupon;
-import com.example.clientsellingmedicine.DTO.CouponDetail;
+import com.example.clientsellingmedicine.DTO.CouponDTO;
+import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 
 import java.util.List;
 
@@ -12,15 +12,12 @@ import retrofit2.http.POST;
 
 public interface CouponService {
 
-    @GET("/api/coupon_detail")
-    Call<List<CouponDetail>> getCoupon();
-
-    @GET("/api/coupon_detail/all")
-    Call<List<CouponDetail>> getAllCoupon();
+    @GET("/api/redeemed-coupons")
+    Call<List<RedeemedCouponDTO>> getRedeemedCoupons();
 
     @GET("/api/coupon")
-    Call<List<Coupon>> getCoupons();
+    Call<List<CouponDTO>> getCoupons();
 
-    @POST("/api/coupon_detail")
-    Call<CouponDetail> exchangeCoupon(@Body Coupon Coupon);
+    @POST("/api/redeemed-coupons")
+    Call<RedeemedCouponDTO> exchangeCoupon(@Body CouponDTO Coupon);
 }
