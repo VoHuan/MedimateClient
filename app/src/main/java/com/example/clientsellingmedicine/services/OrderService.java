@@ -3,7 +3,7 @@ package com.example.clientsellingmedicine.services;
 import com.example.clientsellingmedicine.DTO.MomoResponse;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
-import com.example.clientsellingmedicine.DTO.PaymentDto;
+import com.example.clientsellingmedicine.DTO.OrderWithDetails;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public interface OrderService {
     @GET("/api/order-detail/{id}")
     Call<List<OrderDetailDTO>> getOrderItem(@Path("id")int id);
 
-    @POST("/api/orders")
-    Call<MomoResponse> newOrder(@Body PaymentDto order);
+    @POST("/api/order")
+    Call<MomoResponse> newOrder(@Body OrderWithDetails order);
 
 }

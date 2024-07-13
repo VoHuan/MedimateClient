@@ -120,7 +120,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         cartAdapter.setOnCheckboxChangedListener(this);
 
         // get cart items
-        getCartItems();
+        //getCartItems();
 
         // back to previous screen
         ivBackCart.setOnClickListener(v -> finish());
@@ -527,5 +527,11 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         if(position != -1){
             btn_Apply.setEnabled(true);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getCartItems();
     }
 }

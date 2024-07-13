@@ -1,5 +1,7 @@
 package com.example.clientsellingmedicine.DTO;
 
+import com.example.clientsellingmedicine.models.Order;
+
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -9,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentDto {
-    private List<CartItemDTO> cartDetailDtoList;
-    private Integer couponDetailId;
-    private OrderDTO order;
+public class OrderWithDetails {
+    private List<CartItemDTO> listCartItem;
+    private List<OrderDetailDTO> listOrderItem;
+    private Order order;
 }

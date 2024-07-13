@@ -67,9 +67,9 @@ public class notificationAdapter extends RecyclerView.Adapter <notificationAdapt
         }
         holder.tvContentNotification.setText(content);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        String formattedDate = dateFormat.format(notification.getCreateTime());
+        String formattedDate = dateFormat.format(notification.getCreateAt());
         holder.tvCreateTimeNotification.setText(formattedDate);
-        if (notification.getStatus() == 2) {
+        if (!notification.getIsSeen()) {
             holder.tvStatusNotification.setTextColor(Color.RED);
             holder.tvStatusNotification.setText("Chưa xem");
             holder.layoutNotificationItem.setBackgroundColor(Color.parseColor("#E2DEDE")); // Transparent green

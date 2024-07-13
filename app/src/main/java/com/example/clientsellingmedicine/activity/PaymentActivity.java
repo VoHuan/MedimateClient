@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.confirmOrderAdapter;
 
 import com.example.clientsellingmedicine.Adapter.couponCheckboxAdapter;
+import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
 import com.example.clientsellingmedicine.DTO.AddressDto;
@@ -34,7 +35,9 @@ import com.example.clientsellingmedicine.DTO.CartItemDTO;
 import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.MomoResponse;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
-import com.example.clientsellingmedicine.DTO.PaymentDto;
+import com.example.clientsellingmedicine.DTO.OrderWithDetails;
+import com.example.clientsellingmedicine.models.Order;
+import com.example.clientsellingmedicine.models.OrderDetail;
 import com.example.clientsellingmedicine.services.AddressService;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.OrderService;
@@ -50,7 +53,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,16 +66,17 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
     private Context mContext;
     private RecyclerView rcvOrderItem;
-    private LinearLayout ll_selectVoucher,ll_addAddress,ll_address;
-    private TextView tv_totalPrice,tv_productDiscount,tv_awardPoint,tv_voucherCode,tv_addVoucher,tv_address,tv_updateAddress,
-            tv_voucherDiscount,tv_totalDiscount,tv_finalTotalPrice,tv_addProduct,tv_paymentMethod,edt_noteOrder;
-    private Button btn_payment,btn_addAddress,btn_Apply;;
+    private LinearLayout ll_selectVoucher, ll_addAddress, ll_address;
+    private TextView tv_totalPrice, tv_productDiscount, tv_awardPoint, tv_voucherCode, tv_addVoucher, tv_address, tv_updateAddress,
+            tv_voucherDiscount, tv_totalDiscount, tv_finalTotalPrice, tv_addProduct, tv_paymentMethod, edt_noteOrder;
+    private Button btn_payment, btn_addAddress, btn_Apply;
+    ;
 
     private TextInputEditText txt_input_code;
     private confirmOrderAdapter confirmOrderAdapter;
 
-    private  Boolean isCouponDialogShowing = false;
-    private  Boolean isAddressDialogShowing = false;
+    private Boolean isCouponDialogShowing = false;
+    private Boolean isAddressDialogShowing = false;
 
     private Integer positionVoucherItemSelected = -1;
 
@@ -84,7 +87,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     private List<CartItemDTO> products;
 
 
-    private  couponCheckboxAdapter couponCheckboxAdapter ;
+    private couponCheckboxAdapter couponCheckboxAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +128,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         btn_payment = findViewById(R.id.btn_payment);
         btn_addAddress = findViewById(R.id.btn_addAddress);
     }
+
     private void addEvents() {
         // add voucher
         ll_selectVoucher.setOnClickListener(v -> showSelectCouponDialog());
@@ -151,25 +155,33 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
         // payment
         btn_payment.setOnClickListener(v -> {
-            if(tv_address.getText().toString().isEmpty()){
-                showAlertDialog("Chưa có địa chỉ","Vui lòng thêm địa chỉ trước khi thanh toán !");
-            }
-            PaymentDto orderDto = new PaymentDto();
-
-            OrderDTO order = new OrderDTO();
-            order.setPaymentMethod(tv_paymentMethod.getText().toString());
-            order.setNote(edt_noteOrder.getText().toString());
-            order.setUserAddress(tv_address.getText().toString());
-
-            orderDto.setOrder(order);
-            orderDto.setCartDetailDtoList(products);
-            if(redeemedCoupon != null){
-                orderDto.setCouponDetailId(redeemedCoupon.getId());
-            }
-            newOrder(orderDto);
+            payment();
         });
 
         getData();
+    }
+
+    private void payment() {
+        if (tv_address.getText().toString().isEmpty()) {
+            showAlertDialog("Chưa có địa chỉ", "Vui lòng thêm địa chỉ trước khi thanh toán !");
+        }
+        OrderWithDetails orderWithDetails = new OrderWithDetails();
+
+        Order order = new Order();
+        order.setPaymentMethod(tv_paymentMethod.getText().toString());
+        order.setNote(edt_noteOrder.getText().toString());
+        order.setUserAddress(tv_address.getText().toString());
+        order.setPoint(Integer.parseInt(tv_awardPoint.getText().toString()));
+        order.setTotalCouponDiscount(Convert.convertCurrencyFormat(tv_voucherDiscount.getText().toString()));
+        order.setTotalProductDiscount(Convert.convertCurrencyFormat(tv_productDiscount.getText().toString()));
+        order.setTotal(Convert.convertCurrencyFormat(tv_finalTotalPrice.getText().toString()));
+        if (redeemedCoupon != null) {
+            order.setRedeemedCouponId(redeemedCoupon.getId());
+        }
+
+        orderWithDetails.setOrder(order);
+        orderWithDetails.setListCartItem(products);
+        newOrder(orderWithDetails);
     }
 
     private void getData() {
@@ -180,7 +192,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         String totalAmount = intent.getStringExtra("totalAmount");
         String totalProductDiscount = intent.getStringExtra("totalProductDiscount");
         String totalVoucherDiscount = intent.getStringExtra("totalVoucherDiscount");
-        positionVoucherItemSelected = intent.getIntExtra("positionVoucherItemSelected",-1);
+        positionVoucherItemSelected = intent.getIntExtra("positionVoucherItemSelected", -1);
         redeemedCoupon = (RedeemedCouponDTO) intent.getSerializableExtra("couponDetail");
 
         // set data
@@ -191,13 +203,13 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         tv_totalDiscount.setText(Convert.convertPrice(totalDiscount));
         tv_finalTotalPrice.setText(totalAmount);
         Integer awardPoint = Convert.convertCurrencyFormat(totalPrice) / 1000;
-        tv_awardPoint.setText("+"+awardPoint);
+        tv_awardPoint.setText("+" + awardPoint);
 
-        confirmOrderAdapter= new confirmOrderAdapter(products);
+        confirmOrderAdapter = new confirmOrderAdapter(products);
         rcvOrderItem.setAdapter(confirmOrderAdapter);
         rcvOrderItem.setLayoutManager(new LinearLayoutManager(mContext));
 
-        if(redeemedCoupon != null){
+        if (redeemedCoupon != null) {
             tv_voucherCode.setVisibility(TextView.VISIBLE);
             tv_addVoucher.setVisibility(TextView.GONE);
             tv_voucherCode.setText(redeemedCoupon.getCode());
@@ -207,32 +219,28 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
     }
 
-    public void newOrder(PaymentDto orderDto){
+    public void newOrder(OrderWithDetails orderWithDetails) {
         OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<MomoResponse> request = orderService.newOrder(orderDto);
+        Call<MomoResponse> request = orderService.newOrder(orderWithDetails);
 
         request.enqueue(new Callback<MomoResponse>() {
             @Override
             public void onResponse(Call<MomoResponse> call, Response<MomoResponse> response) {
-                if(response.isSuccessful()){
-//                    Log.d("tag", "onResponse: " + tv_paymentMethod.getText().toString().trim().contains("MOMO"));
-//                    Log.d("tag", "onResponse: " + tv_paymentMethod.getText().toString().trim());
-                    if(tv_paymentMethod.getText().toString().trim().contains("MOMO")){
+                Log.d("tag", "onResponse: "+response.isSuccessful() +response.code() );
+                if (response.isSuccessful()) {
+                    if (tv_paymentMethod.getText().toString().trim().contains("MOMO")) {
                         SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
-//                        Log.d("tag", "onResponse: " + "momo");
                         MomoResponse momoResponse = response.body();
                         Intent intent = new Intent(mContext, MomoPaymentActivity.class);
-                        intent.putExtra("momoResponse",(Serializable) momoResponse);
+                        intent.putExtra("momoResponse", (Serializable) momoResponse);
                         finish();
                         startActivity(intent);
-//                        Uri uri = Uri.parse(response.body().getUrlPayment());
-//                        startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                    }else {
+                    } else {
                         SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
                         Toast.makeText(mContext, "Thanh toán thành công !", Toast.LENGTH_LONG).show();
                         finish();
                     }
-                } else if(response.code() == 401) {
+                } else if (response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     finish();
                     mContext.startActivity(intent);
@@ -243,7 +251,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
             @Override
             public void onFailure(Call<MomoResponse> call, Throwable t) {
-                if (t instanceof IOException){
+                if (t instanceof IOException) {
+                    Log.d("tag", "onResponse: "+t.getMessage() +t.getStackTrace() );
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
@@ -252,6 +261,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
         });
     }
+
     public void getAddress() {
         AddressService addressService = ServiceBuilder.buildService(AddressService.class);
         Call<List<AddressDto>> request = addressService.getAddress();
@@ -259,25 +269,25 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         request.enqueue(new Callback<List<AddressDto>>() {
             @Override
             public void onResponse(Call<List<AddressDto>> call, Response<List<AddressDto>> response) {
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
                     List<AddressDto> list = response.body();
-                   if(list.size() > 0){
-                       ll_address.setVisibility(LinearLayout.VISIBLE);
-                       ll_addAddress.setVisibility(LinearLayout.GONE);
-                       for (AddressDto addressDto : list ) {
-                           if(addressDto.getIs_default()){
-                               // set address default
-                               tv_address.setText(addressDto.getSpecific_address()+", "+addressDto.getWard()+", "+addressDto.getDistrict()+", "+addressDto.getProvince());
-                               break;
-                           }
+                    if (list.size() > 0) {
+                        ll_address.setVisibility(LinearLayout.VISIBLE);
+                        ll_addAddress.setVisibility(LinearLayout.GONE);
+                        for (AddressDto addressDto : list) {
+                            if (addressDto.getIs_default()) {
+                                // set address default
+                                tv_address.setText(addressDto.getSpecific_address() + ", " + addressDto.getWard() + ", " + addressDto.getDistrict() + ", " + addressDto.getProvince());
+                                break;
+                            }
 
-                       }
-                   }else {
-                       ll_address.setVisibility(LinearLayout.GONE);
-                       ll_addAddress.setVisibility(LinearLayout.VISIBLE);
-                   }
+                        }
+                    } else {
+                        ll_address.setVisibility(LinearLayout.GONE);
+                        ll_addAddress.setVisibility(LinearLayout.VISIBLE);
+                    }
 
-                } else if(response.code() == 401) {
+                } else if (response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     finish();
                     mContext.startActivity(intent);
@@ -288,7 +298,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
             @Override
             public void onFailure(Call<List<AddressDto>> call, Throwable t) {
-                if (t instanceof IOException){
+                if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
@@ -297,8 +307,9 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
         });
     }
+
     private void showSelectCouponDialog() {
-        if(isCouponDialogShowing){
+        if (isCouponDialogShowing) {
             return;
         }
         final Dialog dialog = new Dialog(this);
@@ -316,13 +327,15 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         // add event
         iv_close.setOnClickListener(v -> dialog.dismiss()); // close dialog
 
-        txt_input_code.addTextChangedListener( new TextWatcher() {
+        txt_input_code.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
+
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
+
             @Override
             public void afterTextChanged(Editable s) {
                 if (!s.toString().isEmpty()) {
@@ -333,13 +346,13 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             }
         });
 
-       couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), PaymentActivity.this, positionVoucherItemSelected);
+        couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), PaymentActivity.this, positionVoucherItemSelected);
         //couponCheckboxAdapter = new couponCheckboxAdapter(getCoupons(), PaymentActivity.this);
         rcv_coupon.setAdapter(couponCheckboxAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         rcv_coupon.setLayoutManager(layoutManager);
 
-        btn_Apply.setOnClickListener( v -> {
+        btn_Apply.setOnClickListener(v -> {
             redeemedCoupon = couponCheckboxAdapter.getCouponSelected();
             voucherDiscountPercent = redeemedCoupon.getCoupon().getDiscountPercent();  // get voucher discount percent
             positionVoucherItemSelected = couponCheckboxAdapter.getPositionVoucherSelected(); // get position of voucher selected
@@ -348,10 +361,10 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             dialog.dismiss();
         });
 
-        dialog.setOnShowListener( dialog1 -> {
+        dialog.setOnShowListener(dialog1 -> {
             isCouponDialogShowing = true;
         });
-        dialog.setOnDismissListener( dialog1 -> {
+        dialog.setOnDismissListener(dialog1 -> {
             isCouponDialogShowing = false;
         });
 
@@ -435,10 +448,10 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     }
 
     public void handlerApplyCoupon(RedeemedCouponDTO redeemedCoupon) {
-        if(redeemedCoupon != null){
+        if (redeemedCoupon != null) {
             tv_voucherCode.setVisibility(TextView.VISIBLE);
             tv_addVoucher.setVisibility(TextView.GONE);
-            tv_voucherCode.setText( redeemedCoupon.getCode()); // display coupon code
+            tv_voucherCode.setText(redeemedCoupon.getCode()); // display coupon code
             int total = Convert.convertCurrencyFormat(tv_totalPrice.getText().toString().trim()); // get total price
             int totalProductDiscount = Convert.convertCurrencyFormat(tv_productDiscount.getText().toString().trim()); // get total product discount
             int totalVoucherDiscount = redeemedCoupon.getCoupon().getDiscountPercent() * total / 100; // calculate voucher discount
@@ -446,9 +459,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             int totalDiscount = totalProductDiscount + totalVoucherDiscount;
             tv_totalDiscount.setText(Convert.convertPrice(totalDiscount));
             tv_voucherDiscount.setText(Convert.convertPrice(totalVoucherDiscount)); // display voucher discount
-            tv_finalTotalPrice.setText( Convert.convertPrice(totalAmountCart)); // display total final
-        }
-        else {
+            tv_finalTotalPrice.setText(Convert.convertPrice(totalAmountCart)); // display total final
+        } else {
             tv_voucherCode.setVisibility(TextView.GONE);
             tv_addVoucher.setVisibility(TextView.VISIBLE);
             int total = Convert.convertCurrencyFormat(tv_totalPrice.getText().toString().trim()); // get total price
@@ -456,25 +468,25 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             int totalAmountCart = total - totalProductDiscount; // calculate total amount
             tv_totalDiscount.setText(Convert.convertPrice(totalProductDiscount));
             tv_voucherDiscount.setText("0 đ"); // display voucher discount
-            tv_finalTotalPrice.setText( Convert.convertPrice(totalAmountCart)); // display total amount
+            tv_finalTotalPrice.setText(Convert.convertPrice(totalAmountCart)); // display total amount
         }
     }
 
     @Override
     public void onVoucherItemClick(int position) {
-        if(position == -1 && txt_input_code.getText().toString().isEmpty()){
+        if (position == -1 && txt_input_code.getText().toString().isEmpty()) {
             btn_Apply.setEnabled(false);
             redeemedCoupon = couponCheckboxAdapter.getCouponSelected();
             voucherDiscountPercent = 0;
             positionVoucherItemSelected = -1;
             handlerApplyCoupon(redeemedCoupon);
         }
-        if(position != -1){
+        if (position != -1) {
             btn_Apply.setEnabled(true);
         }
     }
 
-    private void showAlertDialog(String title , String message) {
+    private void showAlertDialog(String title, String message) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(mContext);
         builder.setIcon(R.drawable.drug) // Đặt icon của Dialog
                 .setTitle(title)
@@ -483,10 +495,10 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
                 })
                 .show();
     }
+
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("tag", "onResume: " + "onResume");
         getAddress();
     }
 }

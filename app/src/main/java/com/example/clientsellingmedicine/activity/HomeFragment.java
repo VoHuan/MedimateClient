@@ -580,14 +580,14 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                             listCartItemsChecked.add(cart);
                             // update CartItems Checked to SharedPreferences
                             SharedPref.saveData(getContext(), listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
-                            Toast.makeText(mContext, "Add item to cart successfully", Toast.LENGTH_LONG).show();
+                            Toast.makeText(mContext, "Sản phẩm đã được thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
                         }
                         else if(result == 401){
                             Intent intent = new Intent(mContext, LoginActivity.class);
                             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(intent);
                         }else {
-                            Toast.makeText(mContext, "Failed to add item to cart", Toast.LENGTH_LONG).show();
+                            Toast.makeText(mContext, "Thêm vào giỏ hàng thất bại", Toast.LENGTH_LONG).show();
                         }
                     })
                     .exceptionally(ex -> {

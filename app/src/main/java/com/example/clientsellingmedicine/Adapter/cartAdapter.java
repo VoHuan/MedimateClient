@@ -195,6 +195,8 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
 
     public void setAllSelected(boolean selected) {
+        if(listCartItems.size() == 0)
+            return;
         handleCheckBoxSelectedAll(listCartItems, selected);
         isAllSelected = selected;
         notifyDataSetChanged();

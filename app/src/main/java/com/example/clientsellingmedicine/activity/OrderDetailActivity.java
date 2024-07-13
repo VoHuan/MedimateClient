@@ -94,7 +94,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             tv_totalDiscountProduct.setText(Convert.convertPrice(order.getTotalProductDiscount()));
             tv_totalDiscountCoupon.setText(Convert.convertPrice(order.getTotalCouponDiscount()));
             tv_totalDiscount.setText(Convert.convertPrice(order.getTotalDiscount()));
-            tv_couponCode.setText(order.getRedeemed_coupons().getCode());
+            tv_couponCode.setText(order.getRedeemed_coupons() != null ? order.getRedeemed_coupons().getCode() : "");
             tv_paymentMethod.setText(order.getPaymentMethod());
             tv_totalPoint.setText("+"+order.getPoint().toString());
             tv_totalPayment.setText(Convert.convertPrice(order.getTotal()));

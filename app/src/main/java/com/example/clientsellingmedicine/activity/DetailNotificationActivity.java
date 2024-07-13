@@ -31,7 +31,7 @@ public class DetailNotificationActivity extends AppCompatActivity {
             // Set notification details in the views
             tvDetailContentNotification.setText(notification.getContent());
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            String formattedDate = dateFormat.format(notification.getCreateTime());
+            String formattedDate = dateFormat.format(notification.getCreateAt());
             ivNotificationDetailItem.setImageResource(R.drawable.error_image);
             tvDetailCreateTimeNotification.setText(formattedDate); // Assuming you want to display the date as a string
         } else {

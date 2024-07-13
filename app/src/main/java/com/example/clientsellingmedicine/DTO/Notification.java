@@ -15,7 +15,7 @@ public class Notification implements Serializable {
     private Integer idUser;
     private String title;
     private String content;
-    private Date createTime;
+    private Date createAt;
     private String image;
-    private Integer status;
+    private Boolean isSeen;
 }
