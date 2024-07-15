@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.Notification;
 
@@ -33,6 +34,11 @@ public class DetailNotificationActivity extends AppCompatActivity {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             String formattedDate = dateFormat.format(notification.getCreateAt());
             ivNotificationDetailItem.setImageResource(R.drawable.error_image);
+            Glide.with(mContext)
+                    .load(notification.getImage())
+                    .placeholder(R.drawable.loading_icon)
+                    .error(R.drawable.error_image)
+                    .into(ivNotificationDetailItem);
             tvDetailCreateTimeNotification.setText(formattedDate); // Assuming you want to display the date as a string
         } else {
             // Handle the case where notification is null (e.g., show error message)

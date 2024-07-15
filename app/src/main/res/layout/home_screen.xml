@@ -83,15 +83,14 @@
                 </LinearLayout>
 
                 <FrameLayout
-
+                    android:id="@+id/redCircleNotificate"
                     android:layout_width="17dp"
                     android:layout_height="17dp"
                     android:layout_gravity="top|right"
                     android:background="@drawable/red_circle_background"
                     android:layout_marginLeft="25dp"
                     android:layout_marginTop="5dp"
-                    android:visibility="visible"
-
+                    android:visibility="gone"
                     tools:visibility="visible">
 
                     <TextView

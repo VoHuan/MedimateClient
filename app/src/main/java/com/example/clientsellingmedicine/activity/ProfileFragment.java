@@ -108,9 +108,6 @@ public class ProfileFragment extends Fragment {
                     .show();
         });
 
-        // login with token
-        getUserLogin();
-
     }
 
     public void getUserLogin() {
@@ -141,9 +138,7 @@ public class ProfileFragment extends Fragment {
                                 .into(iv_Avatar);
                     }
                 } else if (response.code() == 401) {
-                    Intent intent = new Intent(mContext, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
+                    navigateToLogin();
                 } else {
                     Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
                 }
@@ -197,6 +192,12 @@ public class ProfileFragment extends Fragment {
             }
         });
     }
+    public void navigateToLogin() {
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
     @Override
     public void onResume () {
         super.onResume();

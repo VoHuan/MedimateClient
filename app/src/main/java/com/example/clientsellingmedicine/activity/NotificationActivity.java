@@ -4,6 +4,7 @@ import android.content.Context;
 // Imports for UI elements and RecyclerView
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 // Imports for UI elements
 import android.widget.ImageView;
@@ -22,7 +23,12 @@ import com.example.clientsellingmedicine.interfaces.IOnNotificationItemClickList
 import com.example.clientsellingmedicine.DTO.Notification;
 import com.example.clientsellingmedicine.services.NotificationService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.utils.Constants;
+import com.example.clientsellingmedicine.utils.SharedPref;
+import com.google.gson.reflect.TypeToken;
 
+
+import java.lang.reflect.Type;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,31 +73,7 @@ public class NotificationActivity extends AppCompatActivity implements IOnNotifi
             finish();
         });
         tvReadAllNotification.setOnClickListener(v -> {
-            updateAllNotification();
-        });
-        getNotification();
-    }
-
-    private void updateAllNotification() {
-        NotificationService notificationService = ServiceBuilder.buildService(NotificationService.class);
-        Call<Notification> request = notificationService.updateAllNotification();
-        request.enqueue(new Callback<Notification>() {
-            @Override
-            public void onResponse(Call<Notification> call, Response<Notification> response) {
-                if (response.isSuccessful()) {
-                    if (mAdapter != null) {
-                        getNotification();
-                        mAdapter.setmNotifications(notificationList); // Assuming your adapter has an updateData method
-                    }
-                    Toast.makeText(mContext, "Đọc hết thành công!", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(mContext, "Thất bại!", Toast.LENGTH_LONG).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<Notification> call, Throwable t) {
-                Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
-            }
+            seenAllNotification();
         });
     }
 
@@ -102,28 +84,34 @@ public class NotificationActivity extends AppCompatActivity implements IOnNotifi
             @Override
             public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
                 if (response.isSuccessful()) {
-                    notificationList = new ArrayList<>();
-                    notificationList = response.body().stream() //get list order
-                            .collect(Collectors.toList());
-                    if(notificationList != null && notificationList.size() > 0) {
+                    notificationList = response.body().stream().collect(Collectors.toList());
+                    if (notificationList != null && notificationList.size() > 0) {
                         // Check for notifications and set visibility accordingly
                         rcvNotification.setVisibility(View.VISIBLE);
                         layoutEmptyNotification.setVisibility(View.GONE);
+
+                        //remove notification have seen in Share Prefs if not in data response
+                        List<Notification> listNotificationsHaveSeen = getNotificationsFromSharePrefs();
+                        if(listNotificationsHaveSeen.size() > 0){
+                            listNotificationsHaveSeen.removeIf(notifHaveSeen -> notificationList.stream()
+                                    .noneMatch(notification -> notification.getId() == notifHaveSeen.getId()));
+                        }
+
                         // Create and set adapter for the RecyclerView
-                        mAdapter = new notificationAdapter(notificationList, iOnNotificationItemClickListener);
+                        mAdapter = new notificationAdapter(notificationList, iOnNotificationItemClickListener, listNotificationsHaveSeen);
                         rcvNotification.setAdapter(mAdapter);
                         rcvNotification.setLayoutManager(new LinearLayoutManager(mContext));
-                    }
-                    else {
+                    } else {
                         rcvNotification.setVisibility(View.GONE);
                         layoutEmptyNotification.setVisibility(View.VISIBLE);
                     }
 
                 } else if (response.code() == 401) {
-                    rcvNotification.setVisibility(View.GONE);
-                    layoutEmptyNotification.setVisibility(View.VISIBLE);
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    finish();
+                    startActivity(intent);
                 } else {
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong. Please try again later !", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -141,50 +129,49 @@ public class NotificationActivity extends AppCompatActivity implements IOnNotifi
 
     @Override
     public void onItemClick(Notification notification) {
-        updateNotification(notification);
+        seenNotification(notification);
         open(notification);
     }
 
-    private void updateNotification(Notification notification) {
-        NotificationService notificationService = ServiceBuilder.buildService(NotificationService.class);
-        Call<Notification> updateRequest = notificationService.updateNotification(notification.getId());
+    private void seenNotification(Notification notification) {
+        List<Notification> listNotificationsHaveSeen = getNotificationsFromSharePrefs();
 
-        updateRequest.enqueue(new Callback<Notification>() {
-            @Override
-            public void onResponse(Call<Notification> call, Response<Notification> response) {
-                if (response.isSuccessful()) {
-                    // Update notification list and UI (optional, based on your needs)
-                    Toast.makeText(mContext, "Notification updated successfully", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to update notification", Toast.LENGTH_SHORT).show();
-                }
-            }
+        boolean exists = listNotificationsHaveSeen.stream().anyMatch(item -> item.getId() == notification.getId());
+        if (!exists) {
+            listNotificationsHaveSeen.add(notification);
+            SharedPref.saveData(mContext, listNotificationsHaveSeen, Constants.NOTIFICATE_PREFS_NAME, Constants.KEY_NOTIFICATE);
+        }
+    }
 
-            @Override
-            public void onFailure(Call<Notification> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to update notification", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+    private void seenAllNotification() {
+        //save all notification to SharedPreferences => all notification is seen
+        if (notificationList != null && notificationList.size() > 0) {
+            SharedPref.saveData(mContext, notificationList, Constants.NOTIFICATE_PREFS_NAME, Constants.KEY_NOTIFICATE);
+            mAdapter.setmNotificationsHaveSeen(notificationList);
+            mAdapter.notifyDataSetChanged();
+        }
     }
     public void open(Notification notification) {
         Intent intent = new Intent(mContext, DetailNotificationActivity.class); // Replace with your actual activity class
         intent.putExtra("notification", notification); // Key to pass the notification object
         startActivity(intent);
     }
+
+    private List<Notification> getNotificationsFromSharePrefs() {
+        Type notificatetionType = new TypeToken<List<Notification>>() {
+        }.getType();
+        List<Notification> listNotificationsHaveSeen = SharedPref.loadData(mContext, Constants.NOTIFICATE_PREFS_NAME, Constants.KEY_NOTIFICATE, notificatetionType);
+        return listNotificationsHaveSeen;
+    }
+
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
         super.onPointerCaptureChanged(hasCapture);
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         getNotification();
-        // Khôi phục trạng thái của activity
-        // Cập nhật giao diện người dùng
-        // Chuẩn bị cho việc tương tác của người dùng
     }
 }

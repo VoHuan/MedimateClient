@@ -54,8 +54,10 @@ import com.bumptech.glide.Glide;
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
+import com.example.clientsellingmedicine.Adapter.notificationAdapter;
 import com.example.clientsellingmedicine.Adapter.productAdapter;
 import com.example.clientsellingmedicine.Adapter.feedAdapter;
+import com.example.clientsellingmedicine.DTO.Notification;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonAddToCartClickListener;
 import com.example.clientsellingmedicine.interfaces.IOnFeedItemClickListener;
@@ -67,6 +69,7 @@ import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.models.CartItem;
 import com.example.clientsellingmedicine.services.CartService;
 import com.example.clientsellingmedicine.services.DeviceService;
+import com.example.clientsellingmedicine.services.NotificationService;
 import com.example.clientsellingmedicine.services.ProductService;
 import com.example.clientsellingmedicine.services.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
@@ -87,6 +90,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -102,13 +106,13 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
 
 
     feedAdapter feedAdapter;
-    TextView tv_DisplayAllTopSale,tv_DisplayAllTopDiscount,tvNumberCart,tv_DisplayAllNewProduct;
+    TextView tv_DisplayAllTopSale,tv_DisplayAllTopDiscount,tvNumberCart,tv_DisplayAllNewProduct,tvNumberNotification;
     RecyclerView rcvTopProductSelling, rcvTopProductsDiscount,rcvFeeds,rcvTopNewProduct;
     ImageView ivCart,ivNotification,iv_medicine,iv_health_care,iv_personal_care,iv_convenient_product,iv_functional_food,iv_mom_baby,iv_beauty_care,iv_medical_equipment;
 
     TextInputEditText searchText;
 
-    FrameLayout redCircleCart;
+    FrameLayout redCircleCart, redCircleNotificate;
 
     ImageSlider imageSlider;
     private SearchView searchView;
@@ -153,7 +157,9 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
         ivCart = view.findViewById(R.id.ivCart);
         ivNotification = view.findViewById(R.id.ivNotification);
         tvNumberCart = view.findViewById(R.id.tvNumberCart);
+        tvNumberNotification = view.findViewById(R.id.tvNumberNotification);
         redCircleCart = view.findViewById(R.id.redCircleCart);
+        redCircleNotificate = view.findViewById(R.id.redCircleNotificate);
         imageSlider = view.findViewById(R.id.image_slider);
         iv_medicine = view.findViewById(R.id.iv_medicine);
         iv_health_care = view.findViewById(R.id.iv_health_care);
@@ -238,7 +244,6 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
         ivNotification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(mContext, "Click on Notification", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(getActivity(), NotificationActivity.class);
                 startActivity(intent);
             }
@@ -257,7 +262,8 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     }
 
     public void loadData() {
-        getTotalCartItem();
+        getCountCartItems();
+        getCountNotifications();
         //getTopProductsSelling();
         getTopProductsDiscount();
         getTopNewProducts();
@@ -288,7 +294,7 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -318,13 +324,13 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
                 }
             }
         });
     }
 
-    private void getTotalCartItem(){
+    private void getCountCartItems(){
         CartService cartService = ServiceBuilder.buildService(CartService.class);
         Call<Integer> request = cartService.getTotalItem();
 
@@ -336,19 +342,59 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                 } else if(response.code() == 401) {
                     displayCartItemCount(0);
                 } else {
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    displayCartItemCount(0);
                 }
             }
 
             @Override
             public void onFailure(Call<Integer> call, Throwable t) {
-                if (t instanceof IOException){
-                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
-                }
             }
         });
+    }
+
+    private void getCountNotifications(){
+        NotificationService notificationService = ServiceBuilder.buildService(NotificationService.class);
+        Call<List<Notification>> request = notificationService.getNotification();
+        request.enqueue(new Callback<List<Notification>>() {
+            @Override
+            public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
+                if (response.isSuccessful()) {
+                    List<Notification> notificationList = response.body().stream().collect(Collectors.toList());
+                    if (notificationList != null && notificationList.size() > 0) {
+
+                        // get all notification has seen in Share Prefs
+                        List<Notification> listNotificationsHaveSeen = getNotificationsFromSharePrefs();
+                        if(listNotificationsHaveSeen.size() > 0){
+                            //remove notification have seen in Share Prefs if not in data response
+                            listNotificationsHaveSeen.removeIf(notifHaveSeen -> notificationList.stream()
+                                    .noneMatch(notification -> notification.getId() == notifHaveSeen.getId()));
+                            //display notification not seen
+                            int notificationNotSeenCount = notificationList.size() - listNotificationsHaveSeen.size();   // notification not seen = all - have seen
+                            displayNotificationCount(notificationNotSeenCount);
+                        }else {
+                            displayNotificationCount(notificationList.size());
+                        }
+                    } else {
+                        displayNotificationCount(0);
+                    }
+                } else if (response.code() == 401) {
+                    displayNotificationCount(0);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Notification>> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private List<Notification> getNotificationsFromSharePrefs() {
+        Type notificatetionType = new TypeToken<List<Notification>>() {
+        }.getType();
+        List<Notification> listNotificationsHaveSeen = SharedPref.loadData(mContext, Constants.NOTIFICATE_PREFS_NAME, Constants.KEY_NOTIFICATE, notificatetionType);
+        if (listNotificationsHaveSeen != null && listNotificationsHaveSeen.size() > 0)
+            return listNotificationsHaveSeen;
+        return new ArrayList<>();
     }
 
     private void getTopProductsDiscount(){
@@ -364,10 +410,6 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                     LinearLayoutManager layoutManager
                             = new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false);
                     rcvTopProductsDiscount.setLayoutManager(layoutManager);
-                } else if(response.code() == 401) {
-                    Toast.makeText(mContext, "Your session has expired", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -376,7 +418,7 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                 if (t instanceof IOException){
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -401,6 +443,20 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
         else {
             tvNumberCart.setText(String.valueOf(num));
             redCircleCart.setVisibility(VISIBLE);
+        }
+    }
+
+    private void displayNotificationCount(int num) {
+        if(num <= 0){
+            redCircleNotificate.setVisibility(GONE);
+        }
+        else if(num > 99){
+            tvNumberNotification.setText("99");
+            redCircleNotificate.setVisibility(VISIBLE);
+        }
+        else {
+            tvNumberNotification.setText(String.valueOf(num));
+            redCircleNotificate.setVisibility(VISIBLE);
         }
     }
 
@@ -568,7 +624,7 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                     .thenAccept(result -> {
                         if (result == 201) {
                             // reset total cart
-                            getTotalCartItem();
+                            getCountCartItems();
 
                             //get CartItems Checked from SharedPreferences
                             Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
@@ -662,18 +718,18 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
             public void onResponse(Call<Device> call, Response<Device> response) {
                 if (response.isSuccessful()) {
                     // Update notification list and UI (optional, based on your needs)
-                    Toast.makeText(mContext, "Notification updated successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Device has been saved !", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(mContext, "Failed to update notification", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Failed to save device", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Device> call, Throwable t) {
                 if (t instanceof IOException) {
-                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Failed to save device", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(mContext, "Failed to update notification", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Failed to save device", Toast.LENGTH_LONG).show();
                 }
             }
         });

@@ -150,7 +150,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
         // add more product
         tv_addProduct.setOnClickListener(v -> {
-            finish(); // back to cart activity
+            handlePaymentCanceled();
         });
 
         // payment
@@ -226,7 +226,6 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         request.enqueue(new Callback<MomoResponse>() {
             @Override
             public void onResponse(Call<MomoResponse> call, Response<MomoResponse> response) {
-                Log.d("tag", "onResponse: "+response.isSuccessful() +response.code() );
                 if (response.isSuccessful()) {
                     if (tv_paymentMethod.getText().toString().trim().contains("MOMO")) {
                         SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
@@ -238,7 +237,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
                     } else {
                         SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
                         Toast.makeText(mContext, "Thanh toán thành công !", Toast.LENGTH_LONG).show();
-                        finish();
+                        handlePaymentSuccess();
                     }
                 } else if (response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
@@ -494,6 +493,18 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
                 .setPositiveButton("OK", (dialog, which) -> {
                 })
                 .show();
+    }
+
+    public void handlePaymentSuccess() {
+        Intent resultIntent = new Intent();
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
+    public void handlePaymentCanceled() {
+        Intent resultIntent = new Intent();
+        setResult(RESULT_CANCELED, resultIntent);
+        finish();
     }
 
     @Override

@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.Adapter.cartAdapter;
 import com.example.clientsellingmedicine.Adapter.couponCheckboxAdapter;
+import com.example.clientsellingmedicine.DTO.Notification;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnCartItemListener;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
@@ -64,26 +65,30 @@ import retrofit2.Response;
 
 public class CartActivity extends AppCompatActivity implements IOnCartItemListener, IOnVoucherItemClickListener {
     private Context mContext;
-    cartAdapter cartAdapter = new cartAdapter();
-    couponCheckboxAdapter couponCheckboxAdapter ;
-    RecyclerView rcvCart;
-    LinearLayout bottom_view, linear_layout_dynamic;
-    TextView tv_TotalAmountCart, tvTotalItemCart, tvDelete,tv_Discount, tv_TotalPrice, tv_TotalProductDiscount, tv_TotalVoucherDiscount;
-    LinearLayout ll_Discount;
-    ImageView icon_arrow_up, ivBackCart;
-    CheckBox checkboxCartItem, masterCheckboxCart;
-    List<CartItemDTO> listProductsToBuy;
-    Integer voucherDiscountPercent = 0;
+    private cartAdapter cartAdapter ;
+    private couponCheckboxAdapter couponCheckboxAdapter ;
+    private RecyclerView rcvCart;
+    private LinearLayout bottom_view, linear_layout_dynamic;
+    private TextView tv_TotalAmountCart, tvTotalItemCart, tvDelete,tv_Discount, tv_TotalPrice, tv_TotalProductDiscount, tv_TotalVoucherDiscount;
+    private LinearLayout ll_Discount;
+    private ImageView icon_arrow_up, ivBackCart;
+    private CheckBox checkboxCartItem, masterCheckboxCart;
+    private List<CartItemDTO> listProductsToBuy;
+    private Integer voucherDiscountPercent = 0;
 
-    Integer totalProductDiscount = 0;
-    Integer positionVoucherItemSelected = -1;
+    private IOnCartItemListener IOnCartItemListener;
 
-    Boolean isDialogShowing = false;
-    Button btn_Buy,btn_Apply;
-    TextInputEditText txt_input_code;
+    private Integer totalProductDiscount = 0;
+    private Integer positionVoucherItemSelected = -1;
+
+    private Boolean isDialogShowing = false;
+    private Button btn_Buy,btn_Apply;
+    private TextInputEditText txt_input_code;
 
     private RedeemedCouponDTO couponDetail ;
     private Boolean isShowBottomView = false;
+
+    private static final int PAYMENT_REQUEST_CODE = 1020;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +122,6 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     }
 
     private void addEvents() {
-        cartAdapter.setOnCheckboxChangedListener(this);
 
         // get cart items
         //getCartItems();
@@ -215,14 +219,11 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
     public void buyProducts() {
         // get list cart items checked
-        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
-        List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
-        //Gson gson = new Gson();
+        List<CartItemDTO> listCartItemsChecked = getCartItemCheckedFromSharePrefs();
 
-        //.d("tag", "buyProducts: "+  gson.toJson(listCartItemsChecked));
-        if(listCartItemsChecked != null && listCartItemsChecked.size() > 0){
+        if( listCartItemsChecked.size() > 0){
             Intent intent = new Intent(mContext, PaymentActivity.class);
-            //List<CartItemDTO> listCartItems = SharedPref.loadData(CartActivity.this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+
             intent.putExtra("products", (Serializable) listCartItemsChecked);
             intent.putExtra("totalPrice", tv_TotalPrice.getText().toString());
             intent.putExtra("totalAmount", tv_TotalAmountCart.getText().toString());
@@ -230,7 +231,8 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
             intent.putExtra("totalVoucherDiscount", tv_TotalVoucherDiscount.getText().toString());
             intent.putExtra("couponDetail", (Serializable) couponDetail);
             intent.putExtra("positionVoucherItemSelected",positionVoucherItemSelected);
-            startActivity(intent);
+            startActivityForResult(intent, PAYMENT_REQUEST_CODE);
+
         }
         else {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
@@ -242,6 +244,23 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PAYMENT_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // Xử lý khi thanh toán thành công
+                tv_TotalAmountCart.setText("0 đ");
+                tv_TotalPrice.setText("0 đ");
+                tv_TotalProductDiscount.setText("0 đ");
+                tv_TotalVoucherDiscount.setText("0 đ");
+                tv_Discount.setText("Chọn hoặc nhập mã giảm giá");
+            } else {
+                // Xử lý khi thanh toán bị hủy bỏ nếu cần
+            }
+        }
+    }
+
     public void getCartItems() {
         CartService cartService = ServiceBuilder.buildService(CartService.class);
         Call<List<CartItemDTO>> request = cartService.getCart();
@@ -250,11 +269,13 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
             @Override
             public void onResponse(Call<List<CartItemDTO>> call, Response<List<CartItemDTO>> response) {
                 if (response.isSuccessful()) {
-                    cartAdapter.setListCartItems(response.body());
+                    //get cart item with checked = true
+                    List<CartItemDTO> listCartItemsChecked = getCartItemCheckedFromSharePrefs();
+
+                    cartAdapter = new cartAdapter(response.body(), listCartItemsChecked, CartActivity.this);
                     tvTotalItemCart.setText("(" + cartAdapter.getItemCount() + ")"); // set total item in cart
                     rcvCart.setAdapter(cartAdapter);
-                    LinearLayoutManager layoutManager
-                            = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
                     rcvCart.setLayoutManager(layoutManager);
 
                 } else if (response.code() == 401) {
@@ -329,6 +350,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
     @Override
     public void getTotal(Total total) {
+        //Log.d("tag", "getTotal: "+total);
         tv_TotalPrice.setText(Convert.convertPrice(total.getTotalPrice())); //display total price
         tv_TotalProductDiscount.setText(Convert.convertPrice(total.getTotalProductDiscount())); // display total product discount
 
@@ -527,6 +549,12 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         if(position != -1){
             btn_Apply.setEnabled(true);
         }
+    }
+
+    private List<CartItemDTO> getCartItemCheckedFromSharePrefs() {
+        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+        List<CartItemDTO> listCartItemChecked = SharedPref.loadData(mContext, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+        return listCartItemChecked;
     }
 
     @Override

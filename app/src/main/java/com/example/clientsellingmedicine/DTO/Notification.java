@@ -17,5 +17,4 @@ public class Notification implements Serializable {
     private String content;
     private Date createAt;
     private String image;
-    private Boolean isSeen;
 }

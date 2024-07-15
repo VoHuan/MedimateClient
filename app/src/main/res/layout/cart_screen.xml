@@ -315,7 +315,7 @@
                             android:id="@+id/tv_TotalAmountCart"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0.000đ"
+                            android:text="0đ"
                             android:textColor="@color/header_color"
                             android:textSize="16sp"
                             android:textStyle="bold" />

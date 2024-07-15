@@ -29,29 +29,26 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
     private IOnCartItemListener onCheckboxChangedListener;
 
-    public void setOnCheckboxChangedListener(IOnCartItemListener listener) {
-        this.onCheckboxChangedListener = listener;
-    }
-
     private Context mContext;
-    public static List<CartItemDTO> listCartItems;
-    public static List<CartItemDTO> listCartItemsChecked = new ArrayList<>();
+    private  List<CartItemDTO> listCartItems;
+    private  List<CartItemDTO> listCartItemsChecked ;
 
-    private boolean isAllSelected = false;
+   // private boolean isAllSelected = false;
 
-//    public cartAdapter(List<CartItem> listCartItems) {
-//        this.listCartItems = listCartItems;
-//    }
-
-    public cartAdapter() {
-
+    public cartAdapter(List<CartItemDTO> listCartItems, List<CartItemDTO> listCartItemsChecked, IOnCartItemListener mListener) {
+        this.listCartItems = listCartItems;
+        this.listCartItemsChecked = listCartItemsChecked;
+        this.onCheckboxChangedListener = mListener;
     }
+
+
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView tvNameCartItem, tvPriceCartItem, tvQuantityCartItem,tv_MinusCartItem, tv_PlusCartItem;
@@ -103,7 +100,6 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         holder.tv_MinusCartItem.setOnClickListener(v -> {
             if (quantity > 1) {
                 updateQuantityCartItem(holder.itemView.getContext(), cart, -1);   // update on recycler view and shared preferences
-
             }
         });
         // plus quantity
@@ -111,74 +107,35 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
             updateQuantityCartItem(holder.itemView.getContext(), cart, 1);  // update on recycler view and shared preferences
         });
 
+        //checked cart item
+        boolean exists = listCartItemsChecked.stream().anyMatch(item -> item.getProduct().equals(cart.getProduct()));
+        if(exists)
+            holder.checkboxCartItem.setChecked(true);
 
-//        holder.checkboxCartItem.setChecked(isAllSelected());
-
-        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
-        //get CartItems Checked from SharedPreferences
-        listCartItemsChecked = SharedPref.loadData(holder.itemView.getContext(), Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
-        //if new user, CartItems Checked will be null
-        if (listCartItemsChecked == null) {
-            listCartItemsChecked = new ArrayList<>();
-        }
-        if (listCartItemsChecked != null) {
-            for (CartItemDTO item : listCartItemsChecked) {
-                if (item.getProduct().equals(cart.getProduct())) {
-                    holder.checkboxCartItem.setChecked(true);
-                    break;// checked item in cart
-                }
-            }
-        }
 
         holder.checkboxCartItem.setOnClickListener(v -> {
             if (holder.checkboxCartItem.isChecked()) {
                 listCartItemsChecked.add(cart);
-                // Save CartItems Checked to SharedPreferences
-                SharedPref.saveData(holder.itemView.getContext(), listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
-
-                //set value for master checkbox
-                onCheckboxChangedListener.setValueOfMasterCheckbox(listCartItemsChecked.size() == listCartItems.size());
-
-                //set status for delete text
-                onCheckboxChangedListener.setStatusOfDeleteText(listCartItemsChecked.size() != 0);
-
-                // get Total Amount Item Checked
-                onCheckboxChangedListener.getTotal(calculateTotalAmount());
-
-
-            } else {
-                // Remove item from CartItems Checked
-                for (CartItemDTO cartItem : listCartItemsChecked) {
+            }
+            else {
+                Iterator<CartItemDTO> iterator = listCartItemsChecked.iterator();
+                while (iterator.hasNext()) {
+                    CartItemDTO cartItem = iterator.next();
                     if (cartItem.getProduct().equals(cart.getProduct())) {
-                        listCartItemsChecked.remove(cartItem);
+                        iterator.remove();
                         break;
                     }
                 }
-                // Save CartItems Checked to SharedPreferences
-                SharedPref.saveData(holder.itemView.getContext(), listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
-
-                //set value for master checkbox
-                onCheckboxChangedListener.setValueOfMasterCheckbox(listCartItemsChecked.size() == listCartItems.size());
-
-                //set status for delete text
-                onCheckboxChangedListener.setStatusOfDeleteText(listCartItemsChecked.size() != 0);
-
-                // get Total Amount Item Checked
-                onCheckboxChangedListener.getTotal(calculateTotalAmount());
-
             }
 
+            // Save CartItems Checked to SharedPreferences
+            SharedPref.saveData(holder.itemView.getContext(), listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
+
+            updateUIAfterMasterCheckboxChanged();
         });
 
 
-        //set value for master checkbox
-        onCheckboxChangedListener.setValueOfMasterCheckbox(listCartItemsChecked.size() == listCartItems.size() && listCartItems.size() != 0);
-
-        //set status for delete items text
-        onCheckboxChangedListener.setStatusOfDeleteText(listCartItemsChecked.size() != 0);
-        // get Total Amount Item Checked
-        onCheckboxChangedListener.getTotal(calculateTotalAmount());
-
+        updateUIAfterMasterCheckboxChanged();
 
         //load image
         Glide.with(holder.itemView.getContext())
@@ -197,55 +154,38 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
     public void setAllSelected(boolean selected) {
         if(listCartItems.size() == 0)
             return;
-        handleCheckBoxSelectedAll(listCartItems, selected);
-        isAllSelected = selected;
-        notifyDataSetChanged();
-    }
+        handleCheckBoxSelectedAll( selected);
 
-    public boolean isAllSelected() {
-        return isAllSelected;
     }
-
 
     // update listCartItemsChecked when user click on checkbox selected all
-    public void handleCheckBoxSelectedAll(List<CartItemDTO> list, Boolean isAllSelected) {
+    public void handleCheckBoxSelectedAll( Boolean isAllSelected) {
+        // Clear the current list of checked items
+        this.listCartItemsChecked.clear();
+
+        // If checkbox select all items is selected, add all cart items  to 'list Cart Items Checked'
         if (isAllSelected) {
-            // update listCartItemsChecked
-            this.listCartItemsChecked = list;
-            // update CartItems Checked to SharedPreferences
-            SharedPref.saveData(mContext, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
-        } else {
-            // clear CartItems Checked
-            this.listCartItemsChecked.clear();
-            // update CartItems Checked to SharedPreferences
-            SharedPref.saveData(mContext, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
+            this.listCartItemsChecked.addAll(listCartItems);
         }
+
+        // Save the updated list of checked items to SharedPreferences
+        SharedPref.saveData(mContext, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
+
+        // Notify the adapter that the dataset has changed
         notifyDataSetChanged();
     }
-
-    public void setListCartItems(List<CartItemDTO> list) {
-        this.listCartItems = list;
-        notifyDataSetChanged();
-    }
-
-
 
     public void removeItems(CartItemDTO cartItem) {
         // Remove items from list Cart Items
         listCartItems.remove(cartItem);
-        // update CartItems for RecyclerView
-        setListCartItems(listCartItems);
         // Remove item from CartItems Checked
         listCartItemsChecked.remove(cartItem);
         // Save CartItems Checked to SharedPreferences
         SharedPref.saveData(mContext, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
 
-        //set value for master checkbox
-        onCheckboxChangedListener.setValueOfMasterCheckbox(listCartItemsChecked.size() == listCartItems.size() && listCartItems.size() != 0);
-        //set status for delete items text
-        onCheckboxChangedListener.setStatusOfDeleteText(listCartItemsChecked.size() != 0);
-        // get Total Amount Item Checked
-        onCheckboxChangedListener.getTotal(calculateTotalAmount());
+        updateUIAfterMasterCheckboxChanged();
+
+        notifyDataSetChanged();
 
     }
 
@@ -254,6 +194,7 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         int total = 0, totalProductDiscount = 0;
         if(listCartItemsChecked == null)
             return totalItem;
+        //Log.d("tag", "listCartItemsChecked: "+listCartItemsChecked.size());
         for (CartItemDTO item: listCartItemsChecked) {
             total += item.getProduct().getPrice() * item.getQuantity();
             int discountPercent = item.getProduct().getDiscountPercent();
@@ -264,19 +205,6 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         totalItem.setTotalProductDiscount(totalProductDiscount);
         return totalItem;
     }
-
-//    public int calculateTotalProductDiscount() {
-//        Total totalItem = new Total();
-//        int total = 0, totalProductDiscount = 0;
-//        if(listCartItemsChecked == null)
-//            return 0;
-//        for (CartItem item: listCartItemsChecked) {
-//            int discountPercent = item.getProduct().getDiscountPercent();
-//            int price = item.getProduct().getPrice()*item.getQuantity();
-//            total += (price * discountPercent) / 100;
-//        }
-//        return total;
-//    }
 
 
 
@@ -300,5 +228,17 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         cart.setQuantity(item.getQuantity());
         cart.setId_product(item.getProduct().getId());
         onCheckboxChangedListener.updateCartItemQuantity(cart);
+    }
+
+    private void updateUIAfterMasterCheckboxChanged() {
+        // Set value for master checkbox
+        boolean allItemsChecked = listCartItemsChecked.size() == listCartItems.size() && !listCartItems.isEmpty();
+        onCheckboxChangedListener.setValueOfMasterCheckbox(allItemsChecked);
+
+        // Set status for delete items text
+        onCheckboxChangedListener.setStatusOfDeleteText(!listCartItemsChecked.isEmpty());
+
+        // Get Total Amount Item Checked
+        onCheckboxChangedListener.getTotal(calculateTotalAmount());
     }
 }

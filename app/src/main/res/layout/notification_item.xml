@@ -12,13 +12,12 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
+            android:layout_margin="5dp"
             android:orientation="horizontal">
             <!-- Image -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_marginStart="20dp"
                 android:orientation="horizontal"
                 android:gravity="center">
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,8 +26,8 @@
 
                     <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/ivNotificationItem"
-                        android:layout_width="32dp"
-                        android:layout_height="35dp"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.5"
@@ -98,5 +97,9 @@
 
             </LinearLayout>
         </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray" />
     </androidx.cardview.widget.CardView>
 </RelativeLayout>
