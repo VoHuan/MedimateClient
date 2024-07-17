@@ -40,7 +40,7 @@ public class Convert {
 
         try {
             Date date = inputDateFormat.parse(inputDate);
-            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             return outputFormat.format(date);
         } catch (ParseException e) {
             e.printStackTrace();

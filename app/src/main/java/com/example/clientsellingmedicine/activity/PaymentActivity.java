@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,17 +28,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.confirmOrderAdapter;
 
 import com.example.clientsellingmedicine.Adapter.couponCheckboxAdapter;
-import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
 import com.example.clientsellingmedicine.DTO.AddressDto;
 import com.example.clientsellingmedicine.DTO.CartItemDTO;
 import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.MomoResponse;
-import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.DTO.OrderWithDetails;
 import com.example.clientsellingmedicine.models.Order;
-import com.example.clientsellingmedicine.models.OrderDetail;
 import com.example.clientsellingmedicine.services.AddressService;
 import com.example.clientsellingmedicine.services.CouponService;
 import com.example.clientsellingmedicine.services.OrderService;
@@ -48,9 +46,11 @@ import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -150,18 +150,18 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
         // add more product
         tv_addProduct.setOnClickListener(v -> {
-            handlePaymentCanceled();
+            finish();
         });
 
         // payment
         btn_payment.setOnClickListener(v -> {
-            payment();
+            handlePayment();
         });
 
         getData();
     }
 
-    private void payment() {
+    private void handlePayment() {
         if (tv_address.getText().toString().isEmpty()) {
             showAlertDialog("Chưa có địa chỉ", "Vui lòng thêm địa chỉ trước khi thanh toán !");
         }
@@ -175,13 +175,16 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         order.setTotalCouponDiscount(Convert.convertCurrencyFormat(tv_voucherDiscount.getText().toString()));
         order.setTotalProductDiscount(Convert.convertCurrencyFormat(tv_productDiscount.getText().toString()));
         order.setTotal(Convert.convertCurrencyFormat(tv_finalTotalPrice.getText().toString()));
-        if (redeemedCoupon != null) {
-            order.setRedeemedCouponId(redeemedCoupon.getId());
-        }
+        order.setRedeemedCouponId(redeemedCoupon != null ? redeemedCoupon.getId() : 0);
+
 
         orderWithDetails.setOrder(order);
         orderWithDetails.setListCartItem(products);
-        newOrder(orderWithDetails);
+
+        if(order.getPaymentMethod().equalsIgnoreCase("MOMO"))
+            newOrderWithMoMo(orderWithDetails);
+        else if (order.getPaymentMethod().equalsIgnoreCase("COD"))
+            newOrderWithCOD(orderWithDetails);
     }
 
     private void getData() {
@@ -219,26 +222,19 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
     }
 
-    public void newOrder(OrderWithDetails orderWithDetails) {
+    public void newOrderWithMoMo(OrderWithDetails orderWithDetails) {
         OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<MomoResponse> request = orderService.newOrder(orderWithDetails);
+        Call<MomoResponse> request = orderService.newOrderWithMoMo(orderWithDetails);
 
         request.enqueue(new Callback<MomoResponse>() {
             @Override
             public void onResponse(Call<MomoResponse> call, Response<MomoResponse> response) {
                 if (response.isSuccessful()) {
-                    if (tv_paymentMethod.getText().toString().trim().contains("MOMO")) {
-                        SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
-                        MomoResponse momoResponse = response.body();
-                        Intent intent = new Intent(mContext, MomoPaymentActivity.class);
-                        intent.putExtra("momoResponse", (Serializable) momoResponse);
-                        finish();
-                        startActivity(intent);
-                    } else {
-                        SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
-                        Toast.makeText(mContext, "Thanh toán thành công !", Toast.LENGTH_LONG).show();
-                        handlePaymentSuccess();
-                    }
+                    MomoResponse momoResponse = response.body();
+                    //open momo app to payment
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(momoResponse.getDeeplink().toString()));
+                    finish();
+                    startActivity(intent);
                 } else if (response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     finish();
@@ -251,9 +247,46 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             @Override
             public void onFailure(Call<MomoResponse> call, Throwable t) {
                 if (t instanceof IOException) {
-                    Log.d("tag", "onResponse: "+t.getMessage() +t.getStackTrace() );
+                    Log.d("tag", "onResponse: " + t.getMessage() + t.getStackTrace());
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else {
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        });
+    }
+
+    public void newOrderWithCOD(OrderWithDetails orderWithDetails) {
+        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
+        Call<Order> request = orderService.newOrderWithCOD(orderWithDetails);
+
+        request.enqueue(new Callback<Order>() {
+            @Override
+            public void onResponse(Call<Order> call, Response<Order> response) {
+                if (response.isSuccessful()) {
+                    Order order = response.body();
+                    Intent intent = new Intent(mContext, MomoPaymentResultActivity.class);
+                    intent.putExtra("Order", order);
+                    intent.putExtra("statusCode", response.code());
+                    finish();
+                    startActivity(intent);
+
+                } else if (response.code() == 401) {
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    finish();
+                    mContext.startActivity(intent);
+                } else {
+                    Toast.makeText(mContext, "Something was wrong", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Order> call, Throwable t) {
+                if (t instanceof IOException) {
+                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
+                }
+                else {
                     Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
                 }
             }
@@ -391,8 +424,9 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         iv_back.setOnClickListener(v -> dialog.dismiss());
 
         List<String> paymentMethod = new ArrayList<>();
-        paymentMethod.add("Ship COD");
+        paymentMethod.add("COD");
         paymentMethod.add("ZaloPay");
+        paymentMethod.add("VNPay");
         paymentMethod.add("MOMO");
         paymentMethod.add("Visa/MasterCard");
 
@@ -493,18 +527,6 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
                 .setPositiveButton("OK", (dialog, which) -> {
                 })
                 .show();
-    }
-
-    public void handlePaymentSuccess() {
-        Intent resultIntent = new Intent();
-        setResult(RESULT_OK, resultIntent);
-        finish();
-    }
-
-    public void handlePaymentCanceled() {
-        Intent resultIntent = new Intent();
-        setResult(RESULT_CANCELED, resultIntent);
-        finish();
     }
 
     @Override

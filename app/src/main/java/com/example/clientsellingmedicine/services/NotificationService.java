@@ -14,8 +14,5 @@ import retrofit2.http.Path;
 public interface NotificationService {
     @GET("/api/notification")
     Call<List<Notification>> getNotification();
-    @PATCH("/api/notification/{id}")
-    Call<Void> seenNotification(@Path("id") Integer notificationId);
-    @POST("/api/notification/all")
-    Call<Notification> updateAllNotification();
+
 }

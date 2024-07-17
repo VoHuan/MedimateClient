@@ -218,7 +218,7 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
                 if (response.isSuccessful()) {
                     listOrder = new ArrayList<>();
                     listOrder = response.body().stream() //get list order
-                            .sorted(Comparator.comparing(OrderDTO::getOrderTime).reversed())  // sort by date
+                            .sorted(Comparator.comparing(OrderDTO::getId).reversed())  // sort by id
                             .collect(Collectors.toList());
                     if(listOrder != null && listOrder.size() > 0) {
                         // add list order to recycle view
@@ -277,8 +277,12 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
 
     @Override
     public void onItemClick(OrderDTO order) {
+//        Intent intent = new Intent(mContext, OrderDetailActivity.class);
+//        intent.putExtra("order", order);
+//        startActivity(intent);
+
         Intent intent = new Intent(mContext, OrderDetailActivity.class);
-        intent.putExtra("order", order);
+        intent.putExtra("code", order.getCode());
         startActivity(intent);
     }
 }

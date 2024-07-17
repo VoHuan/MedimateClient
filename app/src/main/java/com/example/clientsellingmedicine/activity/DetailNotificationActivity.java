@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 
 public class DetailNotificationActivity extends AppCompatActivity {
     private Context mContext;
-    private TextView tvDetailContentNotification, tvDetailCreateTimeNotification;
+    private TextView tvDetailContentNotification, tvDetailCreateTimeNotification, tvDetailTitleNotification;
     private ImageView ivNotificationDetailItem, ivBackDetailNotification;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +30,7 @@ public class DetailNotificationActivity extends AppCompatActivity {
 
         if (notification != null) {
             // Set notification details in the views
+            tvDetailTitleNotification.setText(notification.getTitle());
             tvDetailContentNotification.setText(notification.getContent());
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             String formattedDate = dateFormat.format(notification.getCreateAt());
@@ -57,6 +58,7 @@ public class DetailNotificationActivity extends AppCompatActivity {
         tvDetailCreateTimeNotification = findViewById(R.id.tvDetailCreateTimeNotification);
         ivNotificationDetailItem = findViewById(R.id.ivNotificationDetailItem);
         ivBackDetailNotification = findViewById(R.id.ivBackDetailNotification);
+        tvDetailTitleNotification = findViewById(R.id.tvDetailTitleNotification);
     }
 
 }

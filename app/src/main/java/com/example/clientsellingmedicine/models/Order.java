@@ -1,5 +1,6 @@
 package com.example.clientsellingmedicine.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order  {
+public class Order  implements Serializable {
     private Integer id;
     private String code;
     private Integer userId;

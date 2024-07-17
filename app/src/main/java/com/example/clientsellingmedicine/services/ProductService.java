@@ -24,7 +24,7 @@ public interface ProductService {
     @GET("/api/product/newest")
     Call<List<Product>> getNewProducts();
 
-    @GET("/api/product/best_sellers")
+    @GET("/api/product/best-selling")
     Call<List<Product>> getBestSellerProducts();
 
 

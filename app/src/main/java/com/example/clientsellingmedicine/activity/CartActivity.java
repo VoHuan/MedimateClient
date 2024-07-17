@@ -72,13 +72,9 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     private TextView tv_TotalAmountCart, tvTotalItemCart, tvDelete,tv_Discount, tv_TotalPrice, tv_TotalProductDiscount, tv_TotalVoucherDiscount;
     private LinearLayout ll_Discount;
     private ImageView icon_arrow_up, ivBackCart;
-    private CheckBox checkboxCartItem, masterCheckboxCart;
-    private List<CartItemDTO> listProductsToBuy;
+    private CheckBox  masterCheckboxCart;
     private Integer voucherDiscountPercent = 0;
 
-    private IOnCartItemListener IOnCartItemListener;
-
-    private Integer totalProductDiscount = 0;
     private Integer positionVoucherItemSelected = -1;
 
     private Boolean isDialogShowing = false;
@@ -88,7 +84,6 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     private RedeemedCouponDTO couponDetail ;
     private Boolean isShowBottomView = false;
 
-    private static final int PAYMENT_REQUEST_CODE = 1020;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,7 +226,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
             intent.putExtra("totalVoucherDiscount", tv_TotalVoucherDiscount.getText().toString());
             intent.putExtra("couponDetail", (Serializable) couponDetail);
             intent.putExtra("positionVoucherItemSelected",positionVoucherItemSelected);
-            startActivityForResult(intent, PAYMENT_REQUEST_CODE);
+            startActivity(intent);
 
         }
         else {
@@ -244,22 +239,22 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PAYMENT_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                // Xử lý khi thanh toán thành công
-                tv_TotalAmountCart.setText("0 đ");
-                tv_TotalPrice.setText("0 đ");
-                tv_TotalProductDiscount.setText("0 đ");
-                tv_TotalVoucherDiscount.setText("0 đ");
-                tv_Discount.setText("Chọn hoặc nhập mã giảm giá");
-            } else {
-                // Xử lý khi thanh toán bị hủy bỏ nếu cần
-            }
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == PAYMENT_REQUEST_CODE) {
+//            if (resultCode == RESULT_OK) {
+//                // Xử lý khi thanh toán thành công
+//                tv_TotalAmountCart.setText("0 đ");
+//                tv_TotalPrice.setText("0 đ");
+//                tv_TotalProductDiscount.setText("0 đ");
+//                tv_TotalVoucherDiscount.setText("0 đ");
+//                tv_Discount.setText("Chọn hoặc nhập mã giảm giá");
+//            } else {
+//                // Xử lý khi thanh toán bị hủy bỏ nếu cần
+//            }
+//        }
+//    }
 
     public void getCartItems() {
         CartService cartService = ServiceBuilder.buildService(CartService.class);
@@ -269,6 +264,10 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
             @Override
             public void onResponse(Call<List<CartItemDTO>> call, Response<List<CartItemDTO>> response) {
                 if (response.isSuccessful()) {
+
+                    if(response.body().size() == 0)
+                        resetUI();
+
                     //get cart item with checked = true
                     List<CartItemDTO> listCartItemsChecked = getCartItemCheckedFromSharePrefs();
 
@@ -528,7 +527,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
             tv_TotalAmountCart.setText( Convert.convertPrice(totalAmountCart)); // display total amount
         }
         else {
-            tv_Discount.setText("Chọn hoặc nhập mã giảm giá"); // display coupon code
+            tv_Discount.setText("Chọn hoặc nhập mã giảm giá");
             int total = Convert.convertCurrencyFormat(tv_TotalPrice.getText().toString().trim()); // get total price
             int totalProductDiscount = Convert.convertCurrencyFormat(tv_TotalProductDiscount.getText().toString().trim()); // get total product discount
             int totalAmountCart = total - totalProductDiscount; // calculate total amount
@@ -551,6 +550,13 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         }
     }
 
+    private void resetUI(){
+        tv_TotalAmountCart.setText("0 đ");
+        tv_TotalPrice.setText("0 đ");
+        tv_TotalProductDiscount.setText("0 đ");
+        tv_TotalVoucherDiscount.setText("0 đ");
+        tv_Discount.setText("Chọn hoặc nhập mã giảm giá");
+    }
     private List<CartItemDTO> getCartItemCheckedFromSharePrefs() {
         Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
         List<CartItemDTO> listCartItemChecked = SharedPref.loadData(mContext, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);

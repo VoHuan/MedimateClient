@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MomoResponse implements Serializable {
-    private String urlPayment;
+    private String deeplink;
 }

@@ -60,6 +60,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -441,8 +442,16 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
 
 
     private void performSearch(String searchText, Integer categoryId, Integer min, Integer max) {
-        List<Product> filteredProducts = getProductsFiltered(searchText,categoryId,min,max);
+        if(categoryId == -1){
+            List<Product> filteredProducts =  products.stream()
+                    .filter(product -> product.getPrice() >= min && product.getPrice() <= max)
+                    .filter(product -> product.getName().toLowerCase().contains(searchText.toLowerCase()))
+                    .collect(Collectors.toList());
+            productAdapter.setList(filteredProducts);
+            return;
+        }
 
+        List<Product> filteredProducts = getProductsFiltered(searchText,categoryId,min,max);
         if (filteredProducts == null || filteredProducts.size() == 0) {
             Toast.makeText(mContext, "No result found", Toast.LENGTH_SHORT).show();
         } else {
@@ -524,15 +533,13 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
                             getTotalCartItem();
 
                             //get CartItems Checked from SharedPreferences
-                            Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
-                            List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(this, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
-                            if(listCartItemsChecked == null){
-                                listCartItemsChecked = new ArrayList<>();
-                            }
+                            List<CartItemDTO> listCartItemsChecked = getCartItemCheckedFromSharePrefs();
+
+                            // update CartItems Checked to SharedPreferences
                             CartItemDTO cart = new CartItemDTO(product, quantity.get());
                             listCartItemsChecked.add(cart);
-                            // update CartItems Checked to SharedPreferences
                             SharedPref.saveData(this, listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
+
                             Toast.makeText(mContext, "Sản phẩm đã được thêm vào giỏ hàng", Toast.LENGTH_LONG).show();
                         }
                         else if(result == 401){
@@ -645,12 +652,12 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         });
 
         btn_Apply.setOnClickListener(v -> {
-            if (!et_min_price.getText().toString().isEmpty()) {
-                minPrice = Convert.convertCurrencyFormat(et_min_price.getText().toString());
-            }
-            if (!et_max_price.getText().toString().isEmpty()) {
-                maxPrice = Convert.convertCurrencyFormat(et_max_price.getText().toString());
-            }
+            String textMinPrice =  et_min_price.getText().toString();
+            String textMaxPrice =  et_max_price.getText().toString();
+
+            minPrice = !textMinPrice.isEmpty() ? Convert.convertCurrencyFormat(et_min_price.getText().toString()) : 0;
+            maxPrice = !textMaxPrice.isEmpty() ? Convert.convertCurrencyFormat(et_max_price.getText().toString()) : Integer.MAX_VALUE;
+
             // search product after filter
             performSearch(edtSearch.getText().toString(), categoryID, minPrice, maxPrice);
             // dismiss dialog
@@ -703,5 +710,12 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         });
 
         return future;
+    }
+
+
+    private List<CartItemDTO> getCartItemCheckedFromSharePrefs() {
+        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+        List<CartItemDTO> listCartItemChecked = SharedPref.loadData(mContext, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+        return listCartItemChecked;
     }
 }

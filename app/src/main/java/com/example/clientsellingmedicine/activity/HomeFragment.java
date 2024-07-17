@@ -264,7 +264,7 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     public void loadData() {
         getCountCartItems();
         getCountNotifications();
-        //getTopProductsSelling();
+        getTopProductsSelling();
         getTopProductsDiscount();
         getTopNewProducts();
         showSlider();
@@ -627,15 +627,13 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                             getCountCartItems();
 
                             //get CartItems Checked from SharedPreferences
-                            Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
-                            List<CartItemDTO> listCartItemsChecked = SharedPref.loadData(getContext(), Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
-                            if(listCartItemsChecked == null){
-                                listCartItemsChecked = new ArrayList<>();
-                            }
+                            List<CartItemDTO> listCartItemsChecked = getCartItemCheckedFromSharePrefs();
+
+                            // update CartItems Checked to SharedPreferences
                             CartItemDTO cart = new CartItemDTO(product, quantity.get()); //cartItem save to SharedPreferences
                             listCartItemsChecked.add(cart);
-                            // update CartItems Checked to SharedPreferences
                             SharedPref.saveData(getContext(), listCartItemsChecked, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED);
+
                             Toast.makeText(mContext, "Sản phẩm đã được thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
                         }
                         else if(result == 401){
@@ -663,6 +661,11 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
 
     }
 
+    private List<CartItemDTO> getCartItemCheckedFromSharePrefs() {
+        Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();
+        List<CartItemDTO> listCartItemChecked = SharedPref.loadData(mContext, Constants.CART_PREFS_NAME, Constants.KEY_CART_ITEMS_CHECKED, cartItemType);
+        return listCartItemChecked;
+    }
 
     private CompletableFuture<Integer> addToCart(CartItem cartItem) {
         CompletableFuture<Integer> future = new CompletableFuture<>();

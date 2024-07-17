@@ -165,7 +165,7 @@ public class LoginActivity extends AppCompatActivity {
                     finish();
                     startActivity(intent);
 
-                } else if (response.code() == 401) {
+                } else if (response.code() / 100 == 4) {
                     MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(mContext);
                     builder.setIcon(R.drawable.ic_warning) // Đặt icon của Dialog
                             .setTitle("Sai thông tin đăng nhập")
@@ -180,7 +180,7 @@ public class LoginActivity extends AppCompatActivity {
                             })
                             .show();
                 } else {
-                    Toast.makeText(mContext, "Failed to retrieve items (response)", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -189,7 +189,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (t instanceof IOException) {
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
                 } else
-                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
             }
         });
     }

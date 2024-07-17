@@ -8,14 +8,18 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
 
@@ -34,8 +38,10 @@ public class MainActivity extends AppCompatActivity
         .OnNavigationItemSelectedListener {
     private static final int REQUEST_CODE_POST_NOTIFICATIONS = 1001;
     private static int request_notifi_permission = 2;
+    private boolean doubleBackToExitPressedOnce = false;
+    private Handler mHandler = new Handler();
 
-    BottomNavigationView bottomNavigationView;
+    private BottomNavigationView bottomNavigationView;
     private ActivityResultLauncher<Intent> launcher;
     private Context mContext;
 
@@ -92,6 +98,30 @@ public class MainActivity extends AppCompatActivity
                         Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
+
+        // Press the back button twice to return to home, if you are at home then finish()
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+
+                if (bottomNavigationView.getSelectedItemId() == R.id.navigation_home) {
+                    if (doubleBackToExitPressedOnce) {
+                        finish();
+                    } else {
+                        doubleBackToExitPressedOnce = true;
+                        Toast.makeText(getApplicationContext(), "Nhấn nút back thêm lần nữa để thoát app", Toast.LENGTH_SHORT).show();
+                        mHandler.postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+                    }
+                } else {
+                    goToHomeFragment();
+                }
+            }
+        };
+
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     HomeFragment homeFragment = new HomeFragment();
@@ -146,16 +176,12 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+
     public void goToHomeFragment() {
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);
     }
 
 
-    //    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        homeFragment.loadData();
-//    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -192,6 +218,8 @@ public class MainActivity extends AppCompatActivity
             // Nếu thiết bị chạy dưới Android 13, không cần yêu cầu quyền này, chuyển đến MainActivity
         }
     }
+
+
 }
 
 

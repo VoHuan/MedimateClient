@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.clientsellingmedicine.Adapter.orderAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
@@ -25,7 +26,10 @@ import com.example.clientsellingmedicine.services.UserService;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,12 +61,14 @@ public class OrderDetailActivity extends AppCompatActivity {
             finish();
         });
 
-        loadData();
+        Intent intent = getIntent();
+        String code = intent.getStringExtra("code");
+        getOrderByCode(code);
     }
 
     private void addControl() {
         iv_back = findViewById(R.id.iv_back);
-        
+
         tv_userName = findViewById(R.id.tv_userName);
         tv_Phone = findViewById(R.id.tv_Phone);
         tv_Address = findViewById(R.id.tv_Address);
@@ -81,9 +87,8 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     }
 
-    private void loadData() {
-        Intent intent = getIntent();
-        OrderDTO order = (OrderDTO) intent.getSerializableExtra("order");
+    private void loadData(OrderDTO order) {
+
         if (order != null) {
             displayUserInfor(order.getUser());
             getOrderItems(order.getId()); // get order items and total price
@@ -96,22 +101,22 @@ public class OrderDetailActivity extends AppCompatActivity {
             tv_totalDiscount.setText(Convert.convertPrice(order.getTotalDiscount()));
             tv_couponCode.setText(order.getRedeemed_coupons() != null ? order.getRedeemed_coupons().getCode() : "");
             tv_paymentMethod.setText(order.getPaymentMethod());
-            tv_totalPoint.setText("+"+order.getPoint().toString());
+            tv_totalPoint.setText("+" + order.getPoint().toString());
             tv_totalPayment.setText(Convert.convertPrice(order.getTotal()));
         }
     }
 
-public  void displayUserInfor(UserDTO user){
-    if(user.getUsername() != null ){
-        tv_userName.setText(user.getUsername());
-    }else if(user.getPhone() != null) {
-        tv_userName.setText(user.getPhone());
-    }else {
-        tv_userName.setText(user.getEmail());
-    }
+    public void displayUserInfor(UserDTO user) {
+        if (user.getUsername() != null) {
+            tv_userName.setText(user.getUsername());
+        } else if (user.getPhone() != null) {
+            tv_userName.setText(user.getPhone());
+        } else {
+            tv_userName.setText(user.getEmail());
+        }
 
-    tv_Phone.setText(user.getPhone());
-}
+        tv_Phone.setText(user.getPhone());
+    }
 
 
     public void getOrderItems(Integer orderId) {
@@ -124,13 +129,13 @@ public  void displayUserInfor(UserDTO user){
                 if (response.isSuccessful()) {
                     List<OrderDetailDTO> orderItems = response.body();
                     orderDetailAdapter = new orderDetailAdapter(orderItems);
-                    rcvOrderDetail.setAdapter(orderDetailAdapter );
+                    rcvOrderDetail.setAdapter(orderDetailAdapter);
                     rcvOrderDetail.setLayoutManager(new LinearLayoutManager(mContext));
 
                     // calculate total price
                     Integer totalPrice = 0;
                     for (OrderDetailDTO orderItem : orderItems) {
-                        totalPrice+= orderItem.getQuantity() * orderItem.getProductPrice();
+                        totalPrice += orderItem.getQuantity() * orderItem.getProductPrice();
                     }
                     tv_totalPrice.setText(Convert.convertPrice(totalPrice)); // set total price
 
@@ -138,6 +143,7 @@ public  void displayUserInfor(UserDTO user){
                     Toast.makeText(mContext, "Something was wrong", Toast.LENGTH_LONG).show();
                 }
             }
+
             @Override
             public void onFailure(Call<List<OrderDetailDTO>> call, Throwable t) {
                 if (t instanceof IOException) {
@@ -146,6 +152,36 @@ public  void displayUserInfor(UserDTO user){
                     Log.d("TAG", "onFailure: " + t.getMessage());
                 Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
             }
+        });
+    }
+
+
+    public void getOrderByCode(String code) {
+        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
+        Call<OrderDTO> request = orderService.getOrderByCode(code);
+
+        request.enqueue(new Callback<OrderDTO>() {
+            @Override
+            public void onResponse(Call<OrderDTO> call, Response<OrderDTO> response) {
+                if (response.isSuccessful()) {
+                    loadData(response.body());
+                } else if (response.code() == 401) {
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderDTO> call, Throwable t) {
+                if (t instanceof IOException) {
+                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                }
+            }
+
         });
     }
 }
