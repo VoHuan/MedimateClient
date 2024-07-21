@@ -31,6 +31,8 @@ import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
 
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -42,6 +44,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -168,7 +171,7 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        
+
         //save momo order info to DB
         MoMoOrderInfo order = new MoMoOrderInfo(partnerCode, orderId, requestId, amount, orderInfo, orderType, transId, resultCode, message, payType, responseTime, extraData, signature);
         saveMoMoOrderInfo(order);
@@ -180,9 +183,10 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
         //payment failed
         if (Integer.parseInt(resultCode) != 0) {
             handlerPaymentFailed(msg);
-
         }
 
+        //Request to MoMo server get status and update order to DB
+        checkMoMoOrderStatus(partnerCode, requestId, orderId);
     }
 
     private void handlerPaymentResultWithCOD(Order order, int statusCode) {
@@ -198,7 +202,6 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
         //payment failed
         if (statusCode != 201) {
             handlerPaymentFailed("đã có lỗi xảy ra. Vui lòng thử lại sau ít phút hoặc liên hệ Admin để giải quyết !");
-            return;
         }
 
     }
@@ -214,8 +217,8 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
 
     private void handlerPaymentFailed(String msg) {
         imageView.setImageResource(R.drawable.failed);
-        tv_Title.setText("Thanh toán thất bại");
-        tv_Content.setText("Thanh toán không thành công vì " + msg);
+        tv_Title.setText("Đặt hàng thất bại");
+        tv_Content.setText("Đặt hàng không thành công vì " + msg);
     }
 
     private String getCurrentTime(){
@@ -249,15 +252,53 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
 
     public void checkZaloPayOrderStatus(String appTransId) {
         OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<Void> request = orderService.checkZalopayOrderStatus(appTransId);
+        Call<ResponseBody> request = orderService.checkZalopayOrderStatus(appTransId);
 
-        request.enqueue(new Callback<Void>() {
+        request.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseBody = response.body().string(); // Đọc nội dung phản hồi dưới dạng chuỗi
+                        JSONObject jsonObject = new JSONObject(responseBody);
+                        int momoOrderStatus = jsonObject.getInt("orderStatus");
+                        if(momoOrderStatus == 1)
+                            tv_OrderStatus.setText("Đã thanh toán");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+    }
+
+    public void checkMoMoOrderStatus(String partnerCode, String requestId, String orderId) {
+        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
+        Call<ResponseBody> request = orderService.checkMoMoOrderStatus(partnerCode, requestId, orderId);
+
+        request.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseBody = response.body().string(); // Đọc nội dung phản hồi dưới dạng chuỗi
+                        JSONObject jsonObject = new JSONObject(responseBody);
+                        int momoOrderStatus = jsonObject.getInt("orderStatus");
+                        if(momoOrderStatus == 0 || momoOrderStatus == 9000)
+                            tv_OrderStatus.setText("Đã thanh toán");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
 
             }
         });

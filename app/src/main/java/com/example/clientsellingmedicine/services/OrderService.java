@@ -10,11 +10,15 @@ import com.example.clientsellingmedicine.models.Order;
 
 import java.util.List;
 
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface OrderService {
     @GET("/api/order")
@@ -32,11 +36,18 @@ public interface OrderService {
     @POST("/api/order/momo/info")
     Call<MoMoOrderInfo> saveMoMoOrderInfo(@Body MoMoOrderInfo order);
 
+    @GET("/api/order/momo/check-order-status")
+    Call<ResponseBody> checkMoMoOrderStatus(
+            @Query("partnerCode") String partnerCode,
+            @Query("requestId") String requestId,
+            @Query("orderId") String orderId
+    );
+
     @POST("/api/order/zalopay")
     Call<ZalopayResponse> newOrderWithZalopay(@Body OrderWithDetails order);
 
-    @POST("/api/order/zalopay/{app_trans_id}")
-    Call<Void> checkZalopayOrderStatus(@Path("app_trans_id")String app_trans_id);
+    @GET("/api/order/zalopay/{app_trans_id}")
+    Call<ResponseBody> checkZalopayOrderStatus(@Path("app_trans_id")String app_trans_id);
 
     @POST("/api/order/cod")
     Call<Order> newOrderWithCOD(@Body OrderWithDetails order);
