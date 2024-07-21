@@ -4,6 +4,8 @@ import com.example.clientsellingmedicine.DTO.MomoResponse;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
 import com.example.clientsellingmedicine.DTO.OrderWithDetails;
+import com.example.clientsellingmedicine.DTO.ZalopayResponse;
+import com.example.clientsellingmedicine.models.MoMoOrderInfo;
 import com.example.clientsellingmedicine.models.Order;
 
 import java.util.List;
@@ -26,6 +28,15 @@ public interface OrderService {
 
     @POST("/api/order/momo")
     Call<MomoResponse> newOrderWithMoMo(@Body OrderWithDetails order);
+
+    @POST("/api/order/momo/info")
+    Call<MoMoOrderInfo> saveMoMoOrderInfo(@Body MoMoOrderInfo order);
+
+    @POST("/api/order/zalopay")
+    Call<ZalopayResponse> newOrderWithZalopay(@Body OrderWithDetails order);
+
+    @POST("/api/order/zalopay/{app_trans_id}")
+    Call<Void> checkZalopayOrderStatus(@Path("app_trans_id")String app_trans_id);
 
     @POST("/api/order/cod")
     Call<Order> newOrderWithCOD(@Body OrderWithDetails order);

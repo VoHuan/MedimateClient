@@ -270,6 +270,7 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
                     //get cart item with checked = true
                     List<CartItemDTO> listCartItemsChecked = getCartItemCheckedFromSharePrefs();
+                    listCartItemsChecked.retainAll(response.body());
 
                     cartAdapter = new cartAdapter(response.body(), listCartItemsChecked, CartActivity.this);
                     tvTotalItemCart.setText("(" + cartAdapter.getItemCount() + ")"); // set total item in cart

@@ -125,9 +125,19 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="myapp"
-                    android:host="momo-payment-completed" />
+                    android:scheme="medimate"
+                    android:host="online-payment-completed"
+                    android:pathPrefix="/momo"/>
+            </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="medimate"
+                    android:host="online-payment-completed"
+                    android:pathPrefix="/zalopay"/>
             </intent-filter>
         </activity>
     </application>

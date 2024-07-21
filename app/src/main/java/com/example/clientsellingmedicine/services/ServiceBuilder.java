@@ -29,6 +29,8 @@ public class ServiceBuilder {
 //    private static final String URL = "http://10.0.2.2:9000/";
     //device
     private static final String URL = "http://192.168.1.101:8080/"; //ip Wireless LAN adapter Wi-Fi:
+
+    //private static final String URL = "https://29fc-27-3-231-52.ngrok-free.app/";
     // Create logger
     private static HttpLoggingInterceptor logger =
             new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);

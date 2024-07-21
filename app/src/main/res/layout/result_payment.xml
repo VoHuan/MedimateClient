@@ -157,7 +157,7 @@
 
             </TableRow>
 
-            <!-- ID Order -->
+            <!-- Payment method -->
             <TableRow
                 android:background="@drawable/border_table"
                 android:layout_width="match_parent"
@@ -183,7 +183,33 @@
 
             </TableRow>
 
-            <!-- ID Order -->
+            <!-- Order Status -->
+            <TableRow
+                android:background="@drawable/border_table"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:text="Trạng thái thanh toán"
+                    />
+                <TextView
+                    android:id="@+id/tv_OrderStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:gravity="end"
+                    android:textStyle="bold"
+                    android:text="HD0817361661"
+                    />
+
+            </TableRow>
+
+            <!-- Time -->
             <TableRow
                 android:background="@drawable/border_table"
                 android:layout_width="match_parent"
@@ -208,7 +234,6 @@
                     />
 
             </TableRow>
-
 
 
             <!-- Add more TableRow as needed -->

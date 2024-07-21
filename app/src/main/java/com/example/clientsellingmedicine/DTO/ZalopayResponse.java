@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MomoResponse implements Serializable {
-    private String deeplink;
-    private String payUrl;
+public class ZalopayResponse implements Serializable {
+    private String order_url;
 }

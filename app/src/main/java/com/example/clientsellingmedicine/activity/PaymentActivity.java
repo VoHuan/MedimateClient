@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.confirmOrderAdapter;
 
 import com.example.clientsellingmedicine.Adapter.couponCheckboxAdapter;
+import com.example.clientsellingmedicine.DTO.ZalopayResponse;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
 import com.example.clientsellingmedicine.DTO.AddressDto;
@@ -185,6 +186,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             newOrderWithMoMo(orderWithDetails);
         else if (order.getPaymentMethod().equalsIgnoreCase("COD"))
             newOrderWithCOD(orderWithDetails);
+        else if (order.getPaymentMethod().equalsIgnoreCase("ZALOPAY"))
+            newOrderWithZalopay(orderWithDetails);
     }
 
     private void getData() {
@@ -230,11 +233,22 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             @Override
             public void onResponse(Call<MomoResponse> call, Response<MomoResponse> response) {
                 if (response.isSuccessful()) {
+                    Log.d("tag", "onResponse: "+response.body());
                     MomoResponse momoResponse = response.body();
-                    //open momo app to payment
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(momoResponse.getDeeplink().toString()));
-                    finish();
-                    startActivity(intent);
+                    try{
+                        //open MoMo APP to payment
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(momoResponse.getDeeplink().toString()));
+                        finish();
+                        startActivity(intent);
+                    }catch (Exception e){
+                        //open MoMo WEB to payment
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(momoResponse.getPayUrl().toString()));
+                        finish();
+                        startActivity(intent);
+                    }
+
+                    // clear cart items in Shared Preferences
+                    SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
                 } else if (response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     finish();
@@ -246,6 +260,48 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
 
             @Override
             public void onFailure(Call<MomoResponse> call, Throwable t) {
+                if (t instanceof IOException) {
+                    Log.d("tag", "onResponse: " + t.getMessage() + t.getStackTrace());
+                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        });
+    }
+
+    public void newOrderWithZalopay(OrderWithDetails orderWithDetails) {
+        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
+        Call<ZalopayResponse> request = orderService.newOrderWithZalopay(orderWithDetails);
+
+        request.enqueue(new Callback<ZalopayResponse>() {
+            @Override
+            public void onResponse(Call<ZalopayResponse> call, Response<ZalopayResponse> response) {
+                if (response.isSuccessful()) {
+                    ZalopayResponse zalopayResponse = response.body();
+                    try{
+                        //open MoMo APP to payment
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(zalopayResponse.getOrder_url().toString()));
+                        finish();
+                        startActivity(intent);
+                    }catch (Exception e){
+
+                    }
+
+                    // clear cart items in Shared Preferences
+                    SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
+                } else if (response.code() == 401) {
+                    Intent intent = new Intent(mContext, LoginActivity.class);
+                    finish();
+                    mContext.startActivity(intent);
+                } else {
+                    Toast.makeText(mContext, "Something was wrong", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ZalopayResponse> call, Throwable t) {
                 if (t instanceof IOException) {
                     Log.d("tag", "onResponse: " + t.getMessage() + t.getStackTrace());
                     Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
@@ -272,6 +328,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
                     finish();
                     startActivity(intent);
 
+                    // clear cart items in Shared Preferences
+                    SharedPref.clearData(mContext, Constants.CART_PREFS_NAME);
                 } else if (response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     finish();
