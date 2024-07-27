@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.services;
+package com.example.clientsellingmedicine.api;
 
 import com.example.clientsellingmedicine.DTO.AddressDto;
 import com.example.clientsellingmedicine.DTO.District;
@@ -14,10 +14,9 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
-import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
-public interface AddressService {
+public interface AddressAPI {
     @GET("/api/address")
     Call<List<AddressDto>> getAddress();
 

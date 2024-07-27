@@ -11,5 +11,5 @@ public interface IOnCartItemListener {
 
     void getTotal(Total total);
 
-    void updateCartItemQuantity(CartItem cartItem);
+    void updateCartItemQuantity(CartItemDTO cartItem);
 }

@@ -42,10 +42,8 @@ public class MainActivity extends AppCompatActivity
     private Handler mHandler = new Handler();
 
     private BottomNavigationView bottomNavigationView;
-    private ActivityResultLauncher<Intent> launcher;
     private Context mContext;
 
-    public static String tokenDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,46 +58,8 @@ public class MainActivity extends AppCompatActivity
                 .setOnNavigationItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.navigation_home);
 
-        // request permission
+        // request notification permission
         requestPermission();
-
-        // This is only necessary for API level >= 33 (TIRAMISU)
-        FirebaseMessaging.getInstance().subscribeToTopic("news");
-
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
-
-                        // Get new FCM registration token
-                        String token = task.getResult();
-                        tokenDevice = token;
-                        System.out.println("Token is: " + token);
-
-                        // Log and toast
-                        @SuppressLint({"StringFormatInvalid", "LocalSuppress"}) String msg = getString(R.string.msg_token_fmt, token);
-                        Log.d(TAG, msg);
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-                    }
-                });
-        FirebaseMessaging.getInstance().subscribeToTopic("noti")
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        String msg = "Subscribed";
-                        if (!task.isSuccessful()) {
-                            msg = "Subscribe failed";
-                        }
-                        Log.d(TAG, msg);
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
 
         // Press the back button twice to return to home, if you are at home then finish()
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {

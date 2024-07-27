@@ -11,4 +11,7 @@ public class Constants {
 
     public static final String TOKEN_PREFS_NAME = "tokenSharedPrefs";
     public static final String KEY_TOKEN = "token";
+
+    public static final String FIREBASE_TOKEN_PREFS_NAME = "firebaseToken";
+    public static final String KEY_FIREBASE_TOKEN = "firebaseTokenKey";
 }

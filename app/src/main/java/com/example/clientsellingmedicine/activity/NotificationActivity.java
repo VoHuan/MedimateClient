@@ -4,7 +4,6 @@ import android.content.Context;
 // Imports for UI elements and RecyclerView
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 // Imports for UI elements
 import android.widget.ImageView;
@@ -21,8 +20,8 @@ import com.example.clientsellingmedicine.Adapter.notificationAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnNotificationItemClickListener;
 import com.example.clientsellingmedicine.DTO.Notification;
-import com.example.clientsellingmedicine.services.NotificationService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.NotificationAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.gson.reflect.TypeToken;
@@ -30,7 +29,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,8 +76,8 @@ public class NotificationActivity extends AppCompatActivity implements IOnNotifi
     }
 
     public void getNotification() {
-        NotificationService notificationService = ServiceBuilder.buildService(NotificationService.class);
-        Call<List<Notification>> request = notificationService.getNotification();
+        NotificationAPI notificationAPI = ServiceBuilder.buildService(NotificationAPI.class);
+        Call<List<Notification>> request = notificationAPI.getNotification();
         request.enqueue(new Callback<List<Notification>>() {
             @Override
             public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {

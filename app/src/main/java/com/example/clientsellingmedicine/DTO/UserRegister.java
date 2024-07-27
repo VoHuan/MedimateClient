@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GoogleToken {
-    private String idToken;
+public class UserRegister {
+    private String phone;
+    private String password;
+    private String confirmPassword;
 }

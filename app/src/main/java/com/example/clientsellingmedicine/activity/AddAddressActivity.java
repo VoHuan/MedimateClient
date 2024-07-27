@@ -33,9 +33,9 @@ import com.example.clientsellingmedicine.DTO.Province;
 import com.example.clientsellingmedicine.DTO.ResponseDto;
 import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.DTO.Ward;
-import com.example.clientsellingmedicine.services.AddressService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
-import com.example.clientsellingmedicine.services.UserService;
+import com.example.clientsellingmedicine.api.AddressAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
+import com.example.clientsellingmedicine.api.UserAPI;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -306,8 +306,8 @@ public class AddAddressActivity extends AppCompatActivity {
     }
 
     public void addNewAddress(AddressDto addressDto) {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<AddressDto> request = addressService.addAddress(addressDto);
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<AddressDto> request = addressAPI.addAddress(addressDto);
         request.enqueue(new Callback<AddressDto>() {
 
             @Override
@@ -338,8 +338,8 @@ public class AddAddressActivity extends AppCompatActivity {
 
 
     public void updateAddress(AddressDto addressDto) {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<ResponseDto> request = addressService.updateAddress(addressDto);
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<ResponseDto> request = addressAPI.updateAddress(addressDto);
         request.enqueue(new Callback<ResponseDto>() {
 
             @Override
@@ -374,8 +374,8 @@ public class AddAddressActivity extends AppCompatActivity {
 
 
     public List<Province> getProvinces() {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<List<Province>> call = addressService.getProvinces();
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<List<Province>> call = addressAPI.getProvinces();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<Province>> future = executorService.submit(new Callable<List<Province>>() {
@@ -408,8 +408,8 @@ public class AddAddressActivity extends AppCompatActivity {
 
 
     public List<District> getDistricts(Integer provinceId) {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<List<District>> call = addressService.getDistricts(provinceId);
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<List<District>> call = addressAPI.getDistricts(provinceId);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<District>> future = executorService.submit(() -> {
@@ -439,8 +439,8 @@ public class AddAddressActivity extends AppCompatActivity {
 
 
     public List<Ward> getWards(Integer districtId) {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<List<Ward>> call = addressService.getWards(districtId);
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<List<Ward>> call = addressAPI.getWards(districtId);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<Ward>> future = executorService.submit(() -> {
@@ -470,7 +470,7 @@ public class AddAddressActivity extends AppCompatActivity {
 
 
     public UserDTO getUser() {
-        UserService addressService = ServiceBuilder.buildService(UserService.class);
+        UserAPI addressService = ServiceBuilder.buildService(UserAPI.class);
         Call<UserDTO> call = addressService.getUser();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();

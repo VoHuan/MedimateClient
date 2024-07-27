@@ -24,8 +24,8 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.CartItemDTO;
 import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.services.CartService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.CartAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
@@ -119,8 +119,8 @@ public class DetailProductActivity extends AppCompatActivity {
     private CompletableFuture<Integer> addToCart(CartItem cartItem) {
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<CartItem> request = cartService.addCartItem(cartItem);
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<CartItem> request = cartAPI.addCartItem(cartItem);
 
         request.enqueue(new Callback<CartItem>() {
             @Override

@@ -21,8 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.accumulateAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
-import com.example.clientsellingmedicine.services.OrderService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.OrderAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -71,8 +71,8 @@ public class AccumulateFragment extends Fragment {
     }
 
     private void getAllAccumulatePointHistory() {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<List<OrderDTO>> request = orderService.getOrders();
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<List<OrderDTO>> request = orderAPI.getOrders();
 
         request.enqueue(new Callback<List<OrderDTO>>() {
             @Override

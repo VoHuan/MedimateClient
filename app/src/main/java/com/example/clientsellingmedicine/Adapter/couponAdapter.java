@@ -52,11 +52,7 @@ public class couponAdapter extends RecyclerView.Adapter<couponAdapter.ViewHolder
         holder.tvNameDiscountItem.setText(coupon.getDescription());
         // Expire date = current date + expire date
         Integer expire_date = coupon.getUsageDays();
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_MONTH, expire_date);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        String expire = dateFormat.format(calendar.getTime());
-        holder.tvExpireDiscountItem.setText(expire);
+        holder.tvExpireDiscountItem.setText(expire_date +" ngày (từ ngày quy đổi)");
         holder.tv_Point.setText(String.valueOf(coupon.getPoint()));
 
         holder.btn_ExchangePoints.setOnClickListener(v -> {

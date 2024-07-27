@@ -25,8 +25,8 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnOrderItemClickListener;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
 
-import com.example.clientsellingmedicine.services.OrderService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.OrderAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -209,8 +209,8 @@ public class OrderFragment extends Fragment implements IOnOrderItemClickListener
     }
 
     public void getOrders() {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<List<OrderDTO>> request = orderService.getOrders();
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<List<OrderDTO>> request = orderAPI.getOrders();
 
         request.enqueue(new Callback<List<OrderDTO>>() {
             @Override

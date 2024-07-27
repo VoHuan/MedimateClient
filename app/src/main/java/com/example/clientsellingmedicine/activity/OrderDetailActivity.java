@@ -1,9 +1,7 @@
 package com.example.clientsellingmedicine.activity;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
@@ -14,22 +12,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.clientsellingmedicine.Adapter.orderAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.DTO.OrderDetailDTO;
 import com.example.clientsellingmedicine.DTO.UserDTO;
 import com.example.clientsellingmedicine.Adapter.orderDetailAdapter;
-import com.example.clientsellingmedicine.services.OrderService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
-import com.example.clientsellingmedicine.services.UserService;
+import com.example.clientsellingmedicine.api.OrderAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -120,8 +113,8 @@ public class OrderDetailActivity extends AppCompatActivity {
 
 
     public void getOrderItems(Integer orderId) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<List<OrderDetailDTO>> request = orderService.getOrderItem(orderId);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<List<OrderDetailDTO>> request = orderAPI.getOrderItem(orderId);
         request.enqueue(new Callback<List<OrderDetailDTO>>() {
 
             @Override
@@ -157,8 +150,8 @@ public class OrderDetailActivity extends AppCompatActivity {
 
 
     public void getOrderByCode(String code) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<OrderDTO> request = orderService.getOrderByCode(code);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<OrderDTO> request = orderAPI.getOrderByCode(code);
 
         request.enqueue(new Callback<OrderDTO>() {
             @Override

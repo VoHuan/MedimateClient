@@ -8,9 +8,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -51,9 +53,9 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView tvNameCartItem, tvPriceCartItem, tvQuantityCartItem,tv_MinusCartItem, tv_PlusCartItem;
+        public TextView tvNameCartItem, tvPriceCartItem, tvQuantityCartItem,tv_MinusCartItem, tv_PlusCartItem,tvProductDiscontinued;
         public ImageView ivCartItem;
-
+        public RelativeLayout rootLayout;
         public CheckBox checkboxCartItem;
 
         public ViewHolder(View itemView, Context context) {
@@ -66,6 +68,8 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
             tvQuantityCartItem = itemView.findViewById(R.id.tvQuantityCartItem);
             tv_MinusCartItem = itemView.findViewById(R.id.tv_MinusCartItem);
             tv_PlusCartItem = itemView.findViewById(R.id.tv_PlusCartItem);
+            rootLayout = itemView.findViewById(R.id.rootLayout);
+            tvProductDiscontinued = itemView.findViewById(R.id.tvProductDiscontinued);
 
             mContext = context;
 
@@ -143,6 +147,16 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
                 .placeholder(R.drawable.loading_icon) // Hình ảnh thay thế khi đang tải
                 .error(R.drawable.error_image) // Hình ảnh thay thế khi có lỗi
                 .into(holder.ivCartItem);
+
+        //This product has been discontinued
+        if (cart.getProduct().getStatus() == 0) {
+            holder.rootLayout.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.gray));
+            holder.tvProductDiscontinued.setVisibility(View.VISIBLE);
+            //disable all view in this cart item, exception checkbox
+            disableView(holder.itemView, holder.checkboxCartItem.getId());
+        }
+
+
     }
 
     @Override
@@ -156,6 +170,18 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
             return;
         handleCheckBoxSelectedAll( selected);
 
+    }
+
+    private void disableView(View view, int exceptionId) {
+        if (view.getId() != exceptionId) {
+            view.setEnabled(false);
+        }
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                disableView(group.getChildAt(i), exceptionId);
+            }
+        }
     }
 
     // update listCartItemsChecked when user click on checkbox selected all
@@ -194,12 +220,14 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         int total = 0, totalProductDiscount = 0;
         if(listCartItemsChecked == null)
             return totalItem;
-        //Log.d("tag", "listCartItemsChecked: "+listCartItemsChecked.size());
+
         for (CartItemDTO item: listCartItemsChecked) {
-            total += item.getProduct().getPrice() * item.getQuantity();
-            int discountPercent = item.getProduct().getDiscountPercent();
-            int price = item.getProduct().getPrice()*item.getQuantity();
-            totalProductDiscount+= (price * discountPercent) / 100;
+            if(item.getProduct().getStatus() != 0) {    //Ignore discontinued products
+                total += item.getProduct().getPrice() * item.getQuantity();
+                int discountPercent = item.getProduct().getDiscountPercent();
+                int price = item.getProduct().getPrice()*item.getQuantity();
+                totalProductDiscount+= (price * discountPercent) / 100;
+            }
         }
         totalItem.setTotalPrice(total);
         totalItem.setTotalProductDiscount(totalProductDiscount);
@@ -224,10 +252,13 @@ public class cartAdapter extends RecyclerView.Adapter<cartAdapter.ViewHolder> {
         // get Total Amount Item Checked
         onCheckboxChangedListener.getTotal(calculateTotalAmount());
         //  update on database
-        CartItem cart = new CartItem();
-        cart.setQuantity(item.getQuantity());
-        cart.setId_product(item.getProduct().getId());
-        onCheckboxChangedListener.updateCartItemQuantity(cart);
+
+        onCheckboxChangedListener.updateCartItemQuantity(item);
+    }
+
+    public void restorePreviousQuantity(CartItemDTO item){
+        item.setQuantity(item.getQuantity() - 1);
+        notifyDataSetChanged();
     }
 
     private void updateUIAfterMasterCheckboxChanged() {

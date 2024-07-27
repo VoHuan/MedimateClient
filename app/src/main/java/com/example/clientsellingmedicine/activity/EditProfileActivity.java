@@ -23,9 +23,10 @@ import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.UserDTO;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
-import com.example.clientsellingmedicine.services.UserService;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
+import com.example.clientsellingmedicine.api.UserAPI;
 import com.example.clientsellingmedicine.utils.Convert;
+import com.example.clientsellingmedicine.utils.LoadingManager;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -177,8 +178,8 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void updateUser(UserDTO userUpdate) {
-        UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<UserDTO> request = userService.updateUser(userUpdate);
+        UserAPI userAPI = ServiceBuilder.buildService(UserAPI.class);
+        Call<UserDTO> request = userAPI.updateUser(userUpdate);
         request.enqueue(new Callback<UserDTO>() {
             @Override
             public void onResponse(Call<UserDTO> call, Response<UserDTO> response) {
@@ -205,6 +206,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
 
     private void upLoadImage(){
+        LoadingManager.showLoading(this);
         if(imagePath == null){
             handleUpdateInfo();
             return;
@@ -227,11 +229,13 @@ public class EditProfileActivity extends AppCompatActivity {
                 imageLink = (String) resultData.get("url");
                 // update to Database
                 handleUpdateInfo();
+                LoadingManager.hideLoading();
             }
 
             @Override
             public void onError(String requestId, ErrorInfo error) {
                 Log.d("tag", "onError: " + error);
+                LoadingManager.hideLoading();
             }
 
             @Override

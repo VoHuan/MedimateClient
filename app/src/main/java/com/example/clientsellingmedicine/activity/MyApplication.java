@@ -7,9 +7,15 @@ import android.content.Context;
 import android.os.Build;
 
 import com.cloudinary.android.MediaManager;
+import com.example.clientsellingmedicine.DTO.Token;
+import com.example.clientsellingmedicine.utils.Constants;
+import com.example.clientsellingmedicine.utils.SharedPref;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import android.util.Log;
 
 public class MyApplication extends Application {
 
@@ -19,14 +25,16 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
-        initCongif();
+        initCloudinaryConfig();
+        getFCMToken();
+        subscribeToTopic();
     }
 
     public static Context getContext() {
         return context;
     }
 
-    private void initCongif() {
+    private void initCloudinaryConfig() {
 
         Map config = new HashMap();
         config.put("cloud_name", "dwrd1yxgh");
@@ -35,4 +43,40 @@ public class MyApplication extends Application {
         //config.put("secure", true);
         MediaManager.init(this, config);
     }
+
+    private void getFCMToken() {
+
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("FCM", "Fetching FCM registration token failed", task.getException());
+                        return;
+                    }
+
+                    // Get new FCM registration token
+                    String token = task.getResult();
+                    Log.d("FCM", "Token: " + token);
+
+                    // save to Shared Preferences
+                    saveFirebaseDeviceToken(token);
+                });
+    }
+
+    private void subscribeToTopic() {
+        FirebaseMessaging.getInstance().subscribeToTopic("global")
+                .addOnCompleteListener(task -> {
+                    String msg = "Subscribed to global topic!";
+                    if (!task.isSuccessful()) {
+                        msg = "Subscription to global topic failed!";
+                    }
+                    Log.d("FCM", msg);
+                });
+    }
+
+    // save to Shared Preferences
+    private void saveFirebaseDeviceToken(String token) {
+        Token saveToken = new Token(token);
+        SharedPref.saveToken(this, Constants.FIREBASE_TOKEN_PREFS_NAME, Constants.KEY_FIREBASE_TOKEN, saveToken);
+    }
+
 }

@@ -16,7 +16,6 @@ import java.util.Map;
 public class SharedPref {
 
     public static void saveData(Context context, List<?> objectsList, String prefsName, String key) {
-        Log.d("11111111111111111111111111", "saveData: "+objectsList.size());
         Gson gson = new Gson();
         String json = gson.toJson(objectsList);
         SharedPreferences sharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
@@ -49,11 +48,6 @@ public class SharedPref {
         editor.apply();
     }
 
-    public static boolean containsData(Context context, String prefsName, String key) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE);
-        return sharedPreferences.contains(key);
-    }
-
     public static void saveToken(Context context, String prefsName, String key, Token value) {
         Gson gson = new Gson();
         String json = gson.toJson(value);
@@ -71,12 +65,4 @@ public class SharedPref {
         return gson.fromJson(json, Token.class);
     }
 
-
-    public  static void logAllSharedPreferences(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.CART_PREFS_NAME, Context.MODE_PRIVATE);
-        Map<String, ?> allEntries = sharedPreferences.getAll();
-        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
-            Log.d("SharedPrefDebug", entry.getKey() + ": " + entry.getValue().toString());
-        }
-    }
 }

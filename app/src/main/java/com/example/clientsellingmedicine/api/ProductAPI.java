@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.services;
+package com.example.clientsellingmedicine.api;
 
 import com.example.clientsellingmedicine.DTO.Product;
 
@@ -8,7 +8,7 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-public interface ProductService {
+public interface ProductAPI {
     @GET("/api/product")
     Call<List<Product>> getProducts();
 

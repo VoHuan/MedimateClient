@@ -38,9 +38,9 @@ import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
 import com.example.clientsellingmedicine.DTO.CartItemDTO;
 import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.services.CartService;
-import com.example.clientsellingmedicine.services.ProductService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.CartAPI;
+import com.example.clientsellingmedicine.api.ProductAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
@@ -239,8 +239,8 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
 
 
     public List<Product> getProductsTopDiscount() {
-        ProductService productService = ServiceBuilder.buildService(ProductService.class);
-        Call<List<Product>> call = productService.getHavePromotionProducts();
+        ProductAPI productAPI = ServiceBuilder.buildService(ProductAPI.class);
+        Call<List<Product>> call = productAPI.getHavePromotionProducts();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<com.example.clientsellingmedicine.DTO.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.DTO.Product>>) () -> {
@@ -270,8 +270,8 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
     }
 
     public List<Product> getAllNewProducts() {
-        ProductService productService = ServiceBuilder.buildService(ProductService.class);
-        Call<List<Product>> call = productService.getNewProducts();
+        ProductAPI productAPI = ServiceBuilder.buildService(ProductAPI.class);
+        Call<List<Product>> call = productAPI.getNewProducts();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<com.example.clientsellingmedicine.DTO.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.DTO.Product>>) () -> {
@@ -299,8 +299,8 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
         }
     }
     public List<Product> getProductsTopSale() {
-        ProductService productService = ServiceBuilder.buildService(ProductService.class);
-        Call<List<Product>> call = productService.getBestSellerProducts();
+        ProductAPI productAPI = ServiceBuilder.buildService(ProductAPI.class);
+        Call<List<Product>> call = productAPI.getBestSellerProducts();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<com.example.clientsellingmedicine.DTO.Product>> future = executorService.submit((Callable<List<com.example.clientsellingmedicine.DTO.Product>>) () -> {
@@ -329,7 +329,7 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
     }
 
     public List<Product> getProducts() {
-        ProductService addressService = ServiceBuilder.buildService(ProductService.class);
+        ProductAPI addressService = ServiceBuilder.buildService(ProductAPI.class);
         Call<List<Product>> call = addressService.getProducts();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -360,8 +360,8 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
     }
 
     private void getTotalCartItem(){
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<Integer> request = cartService.getTotalItem();
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<Integer> request = cartAPI.getTotalItem();
 
         request.enqueue(new Callback<Integer>() {
             @Override
@@ -402,7 +402,7 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
     }
 
     public List<Product> getProductsFiltered(String keySearch, Integer categoryId, Integer minPrice, Integer maxPrice) {
-        ProductService addressService = ServiceBuilder.buildService(ProductService.class);
+        ProductAPI addressService = ServiceBuilder.buildService(ProductAPI.class);
         Call<List<Product>> call = addressService.getProductsFilter(keySearch, categoryId, minPrice, maxPrice);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -681,8 +681,8 @@ public class ProductActivity extends AppCompatActivity implements IOnProductItem
     private CompletableFuture<Integer> addToCart(CartItem cartItem) {
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<CartItem> request = cartService.addCartItem(cartItem);
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<CartItem> request = cartAPI.addCartItem(cartItem);
 
         request.enqueue(new Callback<CartItem>() {
             @Override

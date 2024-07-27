@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +20,8 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
 import com.example.clientsellingmedicine.DTO.AddressDto;
 import com.example.clientsellingmedicine.DTO.ResponseDto;
-import com.example.clientsellingmedicine.services.AddressService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.AddressAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.IOException;
@@ -134,8 +133,8 @@ public class addressAdapter extends RecyclerView.Adapter <addressAdapter.ViewHol
 
 
     public void deleteAddress(Integer addressID, int position) {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<ResponseDto> request = addressService.deleteAddress(addressID);
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<ResponseDto> request = addressAPI.deleteAddress(addressID);
         request.enqueue(new Callback<ResponseDto>() {
             @Override
             public void onResponse(Call<ResponseDto> call, Response<ResponseDto> response) {

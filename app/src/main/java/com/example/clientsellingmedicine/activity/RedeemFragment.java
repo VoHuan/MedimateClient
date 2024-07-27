@@ -19,8 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.clientsellingmedicine.Adapter.redeemAdapter;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
-import com.example.clientsellingmedicine.services.CouponService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.CouponAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -65,8 +65,8 @@ public class RedeemFragment extends Fragment {
 
 
     private void getAllRedeemPointHistory() {
-        CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<RedeemedCouponDTO>> request = couponService.getRedeemedCoupons();
+        CouponAPI couponAPI = ServiceBuilder.buildService(CouponAPI.class);
+        Call<List<RedeemedCouponDTO>> request = couponAPI.getRedeemedCoupons();
 
         request.enqueue(new Callback<List<RedeemedCouponDTO>>() {
             @Override

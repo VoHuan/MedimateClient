@@ -15,20 +15,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 
-import com.example.clientsellingmedicine.Adapter.orderAdapter;
-import com.example.clientsellingmedicine.DTO.OrderDTO;
 import com.example.clientsellingmedicine.R;
 
 import com.example.clientsellingmedicine.models.MoMoOrderInfo;
 import com.example.clientsellingmedicine.models.Order;
-import com.example.clientsellingmedicine.services.OrderService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
-import com.example.clientsellingmedicine.utils.Constants;
+import com.example.clientsellingmedicine.api.OrderAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Convert;
-import com.example.clientsellingmedicine.utils.SharedPref;
 
 
 import org.json.JSONObject;
@@ -38,11 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -229,8 +220,8 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
 
 
     public void saveMoMoOrderInfo(MoMoOrderInfo order) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<MoMoOrderInfo> request = orderService.saveMoMoOrderInfo(order);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<MoMoOrderInfo> request = orderAPI.saveMoMoOrderInfo(order);
 
         request.enqueue(new Callback<MoMoOrderInfo>() {
             @Override
@@ -251,8 +242,8 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
 
 
     public void checkZaloPayOrderStatus(String appTransId) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<ResponseBody> request = orderService.checkZalopayOrderStatus(appTransId);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<ResponseBody> request = orderAPI.checkZalopayOrderStatus(appTransId);
 
         request.enqueue(new Callback<ResponseBody>() {
             @Override
@@ -278,8 +269,8 @@ public class MomoPaymentResultActivity extends AppCompatActivity {
     }
 
     public void checkMoMoOrderStatus(String partnerCode, String requestId, String orderId) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<ResponseBody> request = orderService.checkMoMoOrderStatus(partnerCode, requestId, orderId);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<ResponseBody> request = orderAPI.checkMoMoOrderStatus(partnerCode, requestId, orderId);
 
         request.enqueue(new Callback<ResponseBody>() {
             @Override

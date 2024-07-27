@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.services;
+package com.example.clientsellingmedicine.api;
 
 import com.example.clientsellingmedicine.DTO.CartItemDTO;
 import com.example.clientsellingmedicine.models.CartItem;
@@ -13,7 +13,7 @@ import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 
-public interface CartService {
+public interface CartAPI {
     @GET("/api/cart")
     Call<List<CartItemDTO>> getCart();
 

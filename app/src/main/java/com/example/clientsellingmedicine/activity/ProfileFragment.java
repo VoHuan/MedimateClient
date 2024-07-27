@@ -24,9 +24,9 @@ import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.ResponseDto;
 import com.example.clientsellingmedicine.DTO.UserDTO;
-import com.example.clientsellingmedicine.services.LogoutService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
-import com.example.clientsellingmedicine.services.UserService;
+import com.example.clientsellingmedicine.api.LogoutAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
+import com.example.clientsellingmedicine.api.UserAPI;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -111,8 +111,8 @@ public class ProfileFragment extends Fragment {
     }
 
     public void getUserLogin() {
-        UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<UserDTO> request = userService.getUser();
+        UserAPI userAPI = ServiceBuilder.buildService(UserAPI.class);
+        Call<UserDTO> request = userAPI.getUser();
         request.enqueue(new Callback<UserDTO>() {
 
             @Override
@@ -157,8 +157,8 @@ public class ProfileFragment extends Fragment {
     }
 
     public void Logout() {
-        LogoutService logoutService = ServiceBuilder.buildService(LogoutService.class);
-        Call<ResponseDto> request = logoutService.logout();
+        LogoutAPI logoutAPI = ServiceBuilder.buildService(LogoutAPI.class);
+        Call<ResponseDto> request = logoutAPI.logout();
         request.enqueue(new Callback<ResponseDto>() {
 
             @Override

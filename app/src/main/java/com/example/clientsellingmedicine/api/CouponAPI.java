@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.services;
+package com.example.clientsellingmedicine.api;
 
 import com.example.clientsellingmedicine.DTO.CouponDTO;
 import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
@@ -10,7 +10,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 
-public interface CouponService {
+public interface CouponAPI {
 
     @GET("/api/redeemed-coupons")
     Call<List<RedeemedCouponDTO>> getRedeemedCoupons();

@@ -14,8 +14,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,10 +23,9 @@ import com.example.clientsellingmedicine.interfaces.IOnButtonExchangeCouponClick
 import com.example.clientsellingmedicine.DTO.CouponDTO;
 import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.UserDTO;
-import com.example.clientsellingmedicine.services.CouponService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
-import com.example.clientsellingmedicine.services.UserService;
-import com.example.clientsellingmedicine.Helper.NotificationHelper;
+import com.example.clientsellingmedicine.api.CouponAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
+import com.example.clientsellingmedicine.api.UserAPI;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.io.IOException;
@@ -83,8 +80,8 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
     }
 
     private void getPoints(){
-        UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<UserDTO> request = userService.getUser();
+        UserAPI userAPI = ServiceBuilder.buildService(UserAPI.class);
+        Call<UserDTO> request = userAPI.getUser();
 
         request.enqueue(new Callback<UserDTO>() {
             @Override
@@ -111,8 +108,8 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
         });
     }
     private void getCoupons(){
-        CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<CouponDTO>> request = couponService.getCoupons();
+        CouponAPI couponAPI = ServiceBuilder.buildService(CouponAPI.class);
+        Call<List<CouponDTO>> request = couponAPI.getCoupons();
 
         request.enqueue(new Callback<List<CouponDTO>>() {
             @Override
@@ -177,21 +174,20 @@ public class ExchangeFragment extends Fragment implements IOnButtonExchangeCoupo
     }
 
     public void exchangeCoupon(CouponDTO coupon){
-        CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<RedeemedCouponDTO> request = couponService.exchangeCoupon(coupon);
+        CouponAPI couponAPI = ServiceBuilder.buildService(CouponAPI.class);
+        Call<RedeemedCouponDTO> request = couponAPI.exchangeCoupon(coupon);
 
         request.enqueue(new Callback<RedeemedCouponDTO>() {
             @Override
             public void onResponse(Call<RedeemedCouponDTO> call, Response<RedeemedCouponDTO> response) {
                 if(response.isSuccessful()){
                     getPoints();
-                    NotificationHelper notificationHelper = new NotificationHelper(mContext);
-                    notificationHelper.sendNotification("Mã giảm giá đã được đổi thành công!", "Bạn vừa nhận được mã giảm giá từ hệ thống. Hãy kiểm tra ngay!");
+                    Toast.makeText(mContext, "Quy đổi mã giảm giá thành công!", Toast.LENGTH_LONG).show();
                 } else if(response.code() == 401) {
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(mContext, "Failed to exchange coupon", Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "Quy đổi mã giảm giá thất bại", Toast.LENGTH_LONG).show();
                 }
             }
 

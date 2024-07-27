@@ -37,21 +37,18 @@ import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.MomoResponse;
 import com.example.clientsellingmedicine.DTO.OrderWithDetails;
 import com.example.clientsellingmedicine.models.Order;
-import com.example.clientsellingmedicine.services.AddressService;
-import com.example.clientsellingmedicine.services.CouponService;
-import com.example.clientsellingmedicine.services.OrderService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.AddressAPI;
+import com.example.clientsellingmedicine.api.CouponAPI;
+import com.example.clientsellingmedicine.api.OrderAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -165,6 +162,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     private void handlePayment() {
         if (tv_address.getText().toString().isEmpty()) {
             showAlertDialog("Chưa có địa chỉ", "Vui lòng thêm địa chỉ trước khi thanh toán !");
+            return;
         }
         OrderWithDetails orderWithDetails = new OrderWithDetails();
 
@@ -188,6 +186,7 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
             newOrderWithCOD(orderWithDetails);
         else if (order.getPaymentMethod().equalsIgnoreCase("ZALOPAY"))
             newOrderWithZalopay(orderWithDetails);
+
     }
 
     private void getData() {
@@ -226,8 +225,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     }
 
     public void newOrderWithMoMo(OrderWithDetails orderWithDetails) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<MomoResponse> request = orderService.newOrderWithMoMo(orderWithDetails);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<MomoResponse> request = orderAPI.newOrderWithMoMo(orderWithDetails);
 
         request.enqueue(new Callback<MomoResponse>() {
             @Override
@@ -272,8 +271,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     }
 
     public void newOrderWithZalopay(OrderWithDetails orderWithDetails) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<ZalopayResponse> request = orderService.newOrderWithZalopay(orderWithDetails);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<ZalopayResponse> request = orderAPI.newOrderWithZalopay(orderWithDetails);
 
         request.enqueue(new Callback<ZalopayResponse>() {
             @Override
@@ -314,8 +313,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     }
 
     public void newOrderWithCOD(OrderWithDetails orderWithDetails) {
-        OrderService orderService = ServiceBuilder.buildService(OrderService.class);
-        Call<Order> request = orderService.newOrderWithCOD(orderWithDetails);
+        OrderAPI orderAPI = ServiceBuilder.buildService(OrderAPI.class);
+        Call<Order> request = orderAPI.newOrderWithCOD(orderWithDetails);
 
         request.enqueue(new Callback<Order>() {
             @Override
@@ -353,8 +352,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     }
 
     public void getAddress() {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<List<AddressDto>> request = addressService.getAddress();
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<List<AddressDto>> request = addressAPI.getAddress();
 
         request.enqueue(new Callback<List<AddressDto>>() {
             @Override
@@ -492,8 +491,14 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
         lv_payment_method.setAdapter(adapter);
         lv_payment_method.setOnItemClickListener((parent, view, position, id) -> {
             Object item = lv_payment_method.getItemAtPosition(position);
-            tv_paymentMethod.setText(item.toString());
-            dialog.dismiss();
+            if(item.toString().equalsIgnoreCase("VNPay") || item.toString().equalsIgnoreCase("Visa/MasterCard")){
+                showAlertDialog("Coming Soon !","Phương thức thanh toán này hiện đang trong quá trình phát triển, chúng tôi sẽ cập nhật tính năng trong thời gian sớm nhất !");
+            }
+            else {
+                tv_paymentMethod.setText(item.toString());
+                dialog.dismiss();
+            }
+
         });
 
         // show dialog
@@ -505,8 +510,8 @@ public class PaymentActivity extends AppCompatActivity implements IOnVoucherItem
     }
 
     public List<RedeemedCouponDTO> getCoupons() {
-        CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<RedeemedCouponDTO>> call = couponService.getRedeemedCoupons();
+        CouponAPI couponAPI = ServiceBuilder.buildService(CouponAPI.class);
+        Call<List<RedeemedCouponDTO>> call = couponAPI.getRedeemedCoupons();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<RedeemedCouponDTO>> future = executorService.submit(() -> {

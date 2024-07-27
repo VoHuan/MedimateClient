@@ -17,12 +17,14 @@ import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.clientsellingmedicine.DTO.Device;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.GoogleToken;
 import com.example.clientsellingmedicine.DTO.UserLogin;
 import com.example.clientsellingmedicine.DTO.Token;
-import com.example.clientsellingmedicine.services.LoginService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.LoginAPI;
+import com.example.clientsellingmedicine.api.NotificationAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
@@ -152,15 +154,19 @@ public class LoginActivity extends AppCompatActivity {
 
 
     public void Login(UserLogin userLogin) {
-        LoginService loginService = ServiceBuilder.buildService(LoginService.class);
-        Call<Token> request = loginService.login(userLogin);
+        LoginAPI loginAPI = ServiceBuilder.buildService(LoginAPI.class);
+        Call<Token> request = loginAPI.login(userLogin);
         request.enqueue(new Callback<Token>() {
 
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 if (response.isSuccessful()) {
+
+                    //save jwt token on client
                     Token token = response.body();
                     SharedPref.saveToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN, token);
+
+                    //navigate
                     Intent intent = new Intent(mContext, MainActivity.class);
                     finish();
                     startActivity(intent);
@@ -195,16 +201,21 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void LoginWithGoogle(GoogleToken googleToken){
-        LoginService loginService = ServiceBuilder.buildService(LoginService.class);
-        Call<Token> request = loginService.loginWithGoogle(googleToken);
+        LoginAPI loginAPI = ServiceBuilder.buildService(LoginAPI.class);
+        Call<Token> request = loginAPI.loginWithGoogle(googleToken);
         request.enqueue(new Callback<Token>() {
 
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 if (response.isSuccessful()) {
+
+                    //save jwt token on client
                     Token token = response.body();
                     SharedPref.saveToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN, token);
+
+                    //navigate
                     Intent intent = new Intent(mContext, MainActivity.class);
+                    finish();
                     startActivity(intent);
                 }
                else {
@@ -222,8 +233,10 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(intent);

@@ -1,39 +1,58 @@
 package com.example.clientsellingmedicine.activity;
 
+
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
+
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.Toast;
-import android.text.TextUtils;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.clientsellingmedicine.utils.LoadingManager;
+import com.airbnb.lottie.LottieAnimationView;
+import com.example.clientsellingmedicine.DTO.GoogleToken;
+import com.example.clientsellingmedicine.DTO.Token;
 import com.example.clientsellingmedicine.R;
+import com.example.clientsellingmedicine.interfaces.PhoneNumberCheckCallback;
+import com.example.clientsellingmedicine.api.LoginAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
+import com.example.clientsellingmedicine.api.UserAPI;
+import com.example.clientsellingmedicine.utils.Constants;
+import com.example.clientsellingmedicine.utils.SharedPref;
+import com.example.clientsellingmedicine.utils.Validator;
 import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.common.api.ApiException;
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.AuthResult;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class RegisterActivity extends AppCompatActivity {
     private Context mContext;
@@ -44,9 +63,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     private SignInClient oneTapClient;
     private BeginSignInRequest signUpRequest;
-    private String verificationId, smsCode;
-    private static final int REQ_ONE_TAP = 2;  // Can be any integer unique to the Activity.
-    private boolean showOneTapUI = true;
+
+    private LottieAnimationView lottieAnimationView;
+
     ActivityResultLauncher<IntentSenderRequest> activityResultLauncher;
 
     @Override
@@ -54,118 +73,91 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.register_screen);
+
         addControl();
         addEvents();
         // below line is for getting instance
         // of our FirebaseAuth.
         mAuth = FirebaseAuth.getInstance();
+
+        //login with google
+        oneTapClient = Identity.getSignInClient(this);
+        signUpRequest = BeginSignInRequest.builder()
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        // Your server's client ID, not your Android client ID.
+                        .setServerClientId(getString(R.string.web_client_id))
+                        // Show all accounts on the device.
+                        .setFilterByAuthorizedAccounts(false)
+                        .build())
+                .build();
+
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), result -> {
+            try {
+                SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(result.getData());
+                String idToken = credential.getGoogleIdToken();
+                if (idToken != null) {
+                    LoginWithGoogle(new GoogleToken(idToken));
+                } else {
+                    displayAlertDialog("Đăng nhập thất bại","Vui lòng kiểm tra lại tài khoản đăng nhập");
+                }
+            } catch (ApiException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void addControl() {
         cbPolicy = findViewById(R.id.cbPolicy);
         tvConfirmPassword = findViewById(R.id.tvConfirmPassword);
-        tvPassword =findViewById(R.id.tvPassword);
+        tvPassword = findViewById(R.id.tvPassword);
         tvPhone = findViewById(R.id.tvPhone);
         btnRegister = findViewById(R.id.btnRegister);
         btn_google_signin_register = findViewById(R.id.btn_google_signin_register);
     }
+
     private void addEvents() {
-        TextWatcher textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                // Enable the button if both EditTexts have values
-                boolean phoneValid = !tvPhone.getText().toString().trim().isEmpty();
-                boolean passwordValid = !tvPassword.getText().toString().trim().isEmpty();
-                boolean confirmPasswordValid = !tvConfirmPassword.getText().toString().trim().isEmpty();
-                boolean policyAgreed = cbPolicy.isChecked();
-                boolean passwordsMatch = passwordValid && tvPassword.getText().toString().trim().equals(tvConfirmPassword.getText().toString().trim());
-
-                if (passwordsMatch) {
-                    int borderWidth = 2; // Adjust thickness as needed
-                    int color = Color.parseColor("#000000");// Red color (replace with your color)
-
-                    // Increase bottom padding for border, maintain other paddings
-                    tvConfirmPassword.setPadding(tvConfirmPassword.getPaddingLeft(),
-                            tvConfirmPassword.getPaddingTop(),
-                            tvConfirmPassword.getPaddingRight(),
-                            tvConfirmPassword.getPaddingBottom() + borderWidth);
-                    tvConfirmPassword.getBackground().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-                } else {
-                    int borderWidth = 2; // Adjust thickness as needed
-                    int color = Color.parseColor("#FF0000"); // Red color (replace with your color)
-
-                    // Increase bottom padding for border, maintain other paddings
-                    tvConfirmPassword.setPadding(tvConfirmPassword.getPaddingLeft(),
-                            tvConfirmPassword.getPaddingTop(),
-                            tvConfirmPassword.getPaddingRight(),
-                            tvConfirmPassword.getPaddingBottom() + borderWidth);
-                    tvConfirmPassword.getBackground().mutate().setColorFilter(color, PorterDuff.Mode.SRC_IN);
-                }
-                btnRegister.setEnabled(phoneValid && passwordValid && confirmPasswordValid && policyAgreed && passwordsMatch);
-            }
-        };
-        TextWatcher textWatcher1 = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                // Enable the button if both EditTexts have values
-                boolean phoneValid = !tvPhone.getText().toString().trim().isEmpty();
-                boolean passwordValid = !tvPassword.getText().toString().trim().isEmpty();
-                boolean confirmPasswordValid = !tvConfirmPassword.getText().toString().trim().isEmpty();
-                boolean policyAgreed = cbPolicy.isChecked();
-                boolean passwordsMatch = passwordValid && tvPassword.getText().toString().trim().equals(tvConfirmPassword.getText().toString().trim());
-            }
-        };
-        cbPolicy.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                boolean phoneValid = !tvPhone.getText().toString().trim().isEmpty();
-                boolean passwordValid = !tvPassword.getText().toString().trim().isEmpty();
-                boolean confirmPasswordValid = !tvConfirmPassword.getText().toString().trim().isEmpty();
-                boolean policyAgreed = cbPolicy.isChecked();
-                boolean passwordsMatch = passwordValid && tvPassword.getText().toString().trim().equals(tvConfirmPassword.getText().toString().trim());
-                btnRegister.setEnabled(phoneValid && passwordValid && confirmPasswordValid && policyAgreed && passwordsMatch);
-            }
+        cbPolicy.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            btnRegister.setEnabled(isChecked);
         });
-        tvConfirmPassword.addTextChangedListener(textWatcher);
-        tvPassword.addTextChangedListener(textWatcher);
-        tvPhone.addTextChangedListener(textWatcher1);
-        btnRegister.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // below line is for checking whether the user
-                // has entered his mobile number or not.
-                if (TextUtils.isEmpty(tvPhone.getText().toString())) {
-                    // when mobile number text field is empty
-                    // displaying a toast message.
-                    Toast.makeText(RegisterActivity.this, "Please enter a valid phone number.", Toast.LENGTH_SHORT).show();
-                } else {
-                    // if the text field is not empty we are calling our
-                    // send OTP method for getting OTP from Firebase.
-                    String phone = "+84" + tvPhone.getText().toString();
-                    sendVerificationCode(phone);
+
+        btnRegister.setOnClickListener(v -> {
+
+            String phoneNumber = tvPhone.getText().toString();
+            String internationalPhoneNumber = "+84" + phoneNumber.toString().substring(1);
+
+            Boolean isInputCorrect = validateFields(); //validate input
+            if(!isInputCorrect)
+                return;
+
+           // lottieAnimationView.playAnimation();
+            LoadingManager.showLoading(mContext);
+
+            checkPhoneNumberAlreadyExists(phoneNumber, new PhoneNumberCheckCallback() {
+                @Override
+                public void onSuccess(boolean isExists) {
+                    if (isExists) {
+                        displayAlertDialog("Thông báo","Số điện thoại này đã tồn tại. Vui lòng sử dụng một số điện thoại khác để đăng ký !");
+                        LoadingManager.hideLoading();
+                    } else {
+                        sendVerificationCode(internationalPhoneNumber);
+                    }
                 }
-            }
+
+                @Override
+                public void onError(String errorMessage) {
+                    // Handle error
+                    Toast.makeText(mContext, "Đã có lỗi xảy ra, vui lòng thử lại sau ít phút !", Toast.LENGTH_LONG).show();
+                    Log.d("tag", "onError: "+errorMessage);
+                    LoadingManager.hideLoading();
+                }
+            });
+
         });
 
         btn_google_signin_register.setOnClickListener(v -> oneTapClient.beginSignIn(signUpRequest)
                 .addOnSuccessListener(RegisterActivity.this, result -> {
-
                     IntentSenderRequest intentSenderRequest =
                             new IntentSenderRequest.Builder(result.getPendingIntent().getIntentSender()).build();
                     activityResultLauncher.launch(intentSenderRequest);
@@ -175,108 +167,145 @@ public class RegisterActivity extends AppCompatActivity {
                     Log.d("TAG", e.getLocalizedMessage());
                 }));
     }
-    private void signInWithCredential(PhoneAuthCredential credential) {
-        // inside this method we are checking if
-        // the code entered is correct or not.
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // if the code is correct and the task is successful
-                            // we are sending our user to new activity.
-                            System.out.println("Vào hàm này rồi!");
-                            System.out.println("Otp code is " + smsCode);
-                            Bundle extras = new Bundle();
-                            extras.putString("phoneNumber", tvPhone.getText().toString());
-                            extras.putString("password", tvPassword.getText().toString());
-                            extras.putString("smsCode", smsCode);
-                            extras.putInt("countDown", 60);
-                            Intent intent = new Intent(mContext, OtpConfirmActivity.class);
-                            intent.putExtras(extras);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                        } else {
-                            // if the code is not correct then we are
-                            // displaying an error message to the user.
-                            Toast.makeText(RegisterActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-    }
 
-    private void sendVerificationCode(String number) {
-        // this method is used for getting
-        // OTP on user phone number.
-        FirebaseAuth.getInstance().getFirebaseAuthSettings().forceRecaptchaFlowForTesting(true);
-        PhoneAuthOptions options =
-                PhoneAuthOptions.newBuilder(mAuth)
-                        .setPhoneNumber(number)       // Phone number to verify
-                        .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
-                        .setCallbacks(mCallBack)
-                        .setActivity(this)
-                        .build();
+    private void sendVerificationCode(String phoneNumber) {
+        //FirebaseAuth.getInstance().getFirebaseAuthSettings().forceRecaptchaFlowForTesting(true);
+        PhoneAuthOptions options = PhoneAuthOptions.newBuilder(mAuth)
+                .setPhoneNumber(phoneNumber)       // Phone number to verify
+                .setTimeout(90L, TimeUnit.SECONDS) // Timeout and unit
+                .setActivity(this) // (optional) activity for callback
+                .setCallbacks(new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    @Override
+                    public void onVerificationCompleted(@NonNull PhoneAuthCredential phoneAuthCredential) {
+
+                    }
+
+                    @Override
+                    public void onVerificationFailed(@NonNull FirebaseException e) {
+                        // Handle error
+                        Log.d("tag", "onVerificationFailed: " + e.getMessage());
+                        Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_LONG).show();
+                        LoadingManager.hideLoading();
+                    }
+
+                    @Override
+                    public void onCodeSent(@NonNull String verificationId, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                        LoadingManager.hideLoading();
+                        // Save the verification ID and resending token
+                        Intent intent = new Intent(mContext, OtpConfirmActivity.class);
+                        intent.putExtra("verificationId", verificationId);
+                        intent.putExtra("phoneNumber", phoneNumber);
+                        intent.putExtra("password", tvPassword.getText().toString().trim());
+                        intent.putExtra("confirmPassword", tvConfirmPassword.getText().toString().trim());
+                        startActivity(intent);
+                    }
+                })
+                .build();
         PhoneAuthProvider.verifyPhoneNumber(options);
     }
 
-    // callback method is called on Phone auth provider.
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks
+    private void checkPhoneNumberAlreadyExists(String phoneNumber, PhoneNumberCheckCallback callback) {
+        // Convert phone number to JSON
+        String phoneNumberJson = "{\"phoneNumber\": \"" + phoneNumber + "\"}";
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(phoneNumberJson, JsonObject.class);
 
-            // initializing our callbacks for on
-            // verification callback method.
-            mCallBack = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+        UserAPI userAPI = ServiceBuilder.buildService(UserAPI.class);
+        Call<Boolean> request = userAPI.checkPhoneNumber(jsonObject);
 
-        // below method is used when
-        // OTP is sent from Firebase
-        @Override
-        public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-            super.onCodeSent(s, forceResendingToken);
-            // when we receive the OTP it
-            // contains a unique id which
-            // we are storing in our string
-            // which we have already created.
-            verificationId = s;
-        }
+        request.enqueue(new Callback<Boolean>() {
+            @Override
+            public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                if (response.isSuccessful()) {
+                    Boolean isExists = response.body();
+                    if (isExists != null) {
+                        // Notify callback of the result
+                        callback.onSuccess(isExists);
 
-        // this method is called when user
-        // receive OTP from Firebase.
-        @Override
-        public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-            // below line is used for getting OTP code
-            // which is sent in phone auth credentials.
-            final String code = phoneAuthCredential.getSmsCode();
-
-            // checking if the code
-            // is null or not.
-            if (code != null) {
-                // if the code is not null then
-                // we are setting that code to
-                // our OTP edittext field.
-                smsCode = code;
-
-                // after setting this code
-                // to OTP edittext field we
-                // are calling our verifycode method.
-                verifyCode(code);
+                    } else {
+                        callback.onError("Unexpected response from server");
+                    }
+                } else {
+                    callback.onError("Server error: " + response.message());
+                }
             }
-        }
 
-        // this method is called when firebase doesn't
-        // sends our OTP code due to any error or issue.
-        @Override
-        public void onVerificationFailed(FirebaseException e) {
-            // displaying error message with firebase exception.
-            Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    };
-
-    // below method is use to verify code from Firebase.
-    private void verifyCode(String code) {
-        // below line is used for getting
-        // credentials from our verification id and code.
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
-        // after getting credential we are
-        // calling sign in method.
-        signInWithCredential(credential);
+            @Override
+            public void onFailure(Call<Boolean> call, Throwable t) {
+                callback.onError("Network error: " + t.getMessage());
+            }
+        });
     }
+
+
+    private void LoginWithGoogle(GoogleToken googleToken) {
+        LoginAPI loginAPI = ServiceBuilder.buildService(LoginAPI.class);
+        Call<Token> request = loginAPI.loginWithGoogle(googleToken);
+        request.enqueue(new Callback<Token>() {
+
+            @Override
+            public void onResponse(Call<Token> call, Response<Token> response) {
+                if (response.isSuccessful()) {
+                    Token token = response.body();
+                    SharedPref.saveToken(mContext, Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN, token);
+                    Intent intent = new Intent(mContext, MainActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(mContext, "Đăng nhập thất bại, đã có lỗi xảy ra !", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Token> call, Throwable t) {
+                if (t instanceof IOException) {
+                    Toast.makeText(mContext, "A connection error occured", Toast.LENGTH_LONG).show();
+                } else
+                    Toast.makeText(mContext, "Failed to retrieve items", Toast.LENGTH_LONG).show();
+            }
+        });
+
+    }
+
+    private void displayAlertDialog (String title, String content) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(mContext);
+        builder.setIcon(R.drawable.ic_warning) // Đặt icon của Dialog
+                .setTitle(title)
+                .setMessage(content)
+//                            .setCancelable(false) // Bấm ra ngoài không mất dialog
+                .setPositiveButton("OK", (dialog, which) -> {
+                    // Xử lý khi nhấn nút OK
+                })
+                .show();
+    }
+
+    private boolean validateFields(){
+        String phone = tvPhone.getText().toString().trim();
+        String password = tvPassword.getText().toString().trim();
+        String confirmPassword = tvConfirmPassword.getText().toString().trim();
+
+        if(phone.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()){
+            displayAlertDialog("Thông tin không hợp lệ","Vui lòng không bỏ trống thông tin !");
+            return false;
+        }
+
+        if(!Validator.isValidPhoneNumber(phone)){
+            displayAlertDialog("Thông tin không hợp lệ","Vui lòng điền đúng định dạng số điện thoại !");
+            return false;
+        }
+
+        if(password.length() < 6 ){
+            displayAlertDialog("Thông tin không hợp lệ","Mật khẩu phải có ít nhất 6 kí tự !");
+            return false;
+        }
+
+        if(!password.equals(confirmPassword)){
+            displayAlertDialog("Thông tin không hợp lệ","Mật khẩu và xác nhận mật khẩu không trùng khớp !");
+            return false;
+        }
+
+        return true;
+    }
+
 }
+
+

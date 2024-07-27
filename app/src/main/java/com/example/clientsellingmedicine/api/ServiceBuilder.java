@@ -1,8 +1,7 @@
-package com.example.clientsellingmedicine.services;
+package com.example.clientsellingmedicine.api;
 
 
 import android.os.Build;
-import android.util.Log;
 
 import com.example.clientsellingmedicine.activity.MyApplication;
 import com.example.clientsellingmedicine.DTO.Token;
@@ -28,7 +27,7 @@ public class ServiceBuilder {
     //emulater
 //    private static final String URL = "http://10.0.2.2:9000/";
     //device
-    private static final String URL = "http://192.168.1.101:8080/"; //ip Wireless LAN adapter Wi-Fi:
+    private static final String URL = "http://192.168.1.102:8080/"; //ip Wireless LAN adapter Wi-Fi:
 
     //private static final String URL = "https://29fc-27-3-231-52.ngrok-free.app/";
     // Create logger
@@ -67,7 +66,7 @@ public class ServiceBuilder {
                                         isRefreshing = true; // Đánh dấu bắt đầu quá trình làm mới token
                                         Token currentToken = SharedPref.loadToken(MyApplication.getContext(), Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN);
 
-                                        if (currentToken != null && currentToken.getAccessToken().equals(token.getAccessToken())) {
+                                        if (currentToken != null && currentToken.getToken().equals(token.getToken())) {
                                             int code = refreshToken() / 100;
                                             if (code == 2) { // Nếu refresh token thành công
                                                 Token newToken = SharedPref.loadToken(MyApplication.getContext(), Constants.TOKEN_PREFS_NAME, Constants.KEY_TOKEN);
@@ -102,13 +101,13 @@ public class ServiceBuilder {
 
 
     private static void setAuthHeader(Request.Builder builder, Token token) {
-        if (token !=null && token.getAccessToken() != null && token.getAccessToken() != "") //Add Auth token to each request if authorized
-            builder.header("Authorization", String.format("Bearer %s", token.getAccessToken()));
+        if (token !=null && token.getToken() != null && token.getToken() != "") //Add Auth token to each request if authorized
+            builder.header("Authorization", String.format("Bearer %s", token.getToken()));
     }
 
     private static int refreshToken() {
-        LoginService loginService = ServiceBuilder.buildService(LoginService.class);
-        Call<Token> requestRefreshToken = loginService.refreshToken();
+        LoginAPI loginAPI = ServiceBuilder.buildService(LoginAPI.class);
+        Call<Token> requestRefreshToken = loginAPI.refreshToken();
 
         try {
             retrofit2.Response<Token> response = requestRefreshToken.execute();

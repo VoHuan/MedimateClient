@@ -15,8 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.DTO.UserDTO;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
-import com.example.clientsellingmedicine.services.UserService;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
+import com.example.clientsellingmedicine.api.UserAPI;
 import com.example.clientsellingmedicine.utils.Convert;
 
 import java.io.IOException;
@@ -65,8 +65,8 @@ public class IndividualActivity extends AppCompatActivity {
     }
 
     public void getUserLogin() {
-        UserService userService = ServiceBuilder.buildService(UserService.class);
-        Call<UserDTO> request = userService.getUser();
+        UserAPI userAPI = ServiceBuilder.buildService(UserAPI.class);
+        Call<UserDTO> request = userAPI.getUser();
         request.enqueue(new Callback<UserDTO>() {
 
             @Override

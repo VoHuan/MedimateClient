@@ -9,7 +9,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.clientsellingmedicine.Adapter.cartAdapter;
 import com.example.clientsellingmedicine.Adapter.couponCheckboxAdapter;
-import com.example.clientsellingmedicine.DTO.Notification;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnCartItemListener;
 import com.example.clientsellingmedicine.interfaces.IOnVoucherItemClickListener;
@@ -35,27 +33,26 @@ import com.example.clientsellingmedicine.DTO.CartItemDTO;
 import com.example.clientsellingmedicine.DTO.RedeemedCouponDTO;
 import com.example.clientsellingmedicine.DTO.Total;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.services.CartService;
-import com.example.clientsellingmedicine.services.CouponService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.CartAPI;
+import com.example.clientsellingmedicine.api.CouponAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 
 import retrofit2.Call;
@@ -215,11 +212,15 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     public void buyProducts() {
         // get list cart items checked
         List<CartItemDTO> listCartItemsChecked = getCartItemCheckedFromSharePrefs();
+        //filter products with status != 0
+        List<CartItemDTO> products = listCartItemsChecked.stream()
+                .filter(cartItem -> cartItem.getProduct().getStatus() != 0)
+                .collect(Collectors.toList());
 
         if( listCartItemsChecked.size() > 0){
             Intent intent = new Intent(mContext, PaymentActivity.class);
 
-            intent.putExtra("products", (Serializable) listCartItemsChecked);
+            intent.putExtra("products", (Serializable) products);
             intent.putExtra("totalPrice", tv_TotalPrice.getText().toString());
             intent.putExtra("totalAmount", tv_TotalAmountCart.getText().toString());
             intent.putExtra("totalProductDiscount", tv_TotalProductDiscount.getText().toString());
@@ -230,35 +231,14 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
         }
         else {
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
-            builder.setIcon(R.drawable.ic_warning) // Đặt icon của Dialog
-                    .setTitle("Không có sản phẩm nào được chọn")
-                    .setMessage("Vui lòng chọn ít nhất 1 sản phẩm trước khi thanh toán !")
-                    .setPositiveButton("OK", (dialog, which) -> {}) // do nothing
-                    .show();
+            displayAlertDialog("Không có sản phẩm nào được chọn","Vui lòng chọn ít nhất 1 sản phẩm trước khi thanh toán !");
         }
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        if (requestCode == PAYMENT_REQUEST_CODE) {
-//            if (resultCode == RESULT_OK) {
-//                // Xử lý khi thanh toán thành công
-//                tv_TotalAmountCart.setText("0 đ");
-//                tv_TotalPrice.setText("0 đ");
-//                tv_TotalProductDiscount.setText("0 đ");
-//                tv_TotalVoucherDiscount.setText("0 đ");
-//                tv_Discount.setText("Chọn hoặc nhập mã giảm giá");
-//            } else {
-//                // Xử lý khi thanh toán bị hủy bỏ nếu cần
-//            }
-//        }
-//    }
 
     public void getCartItems() {
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<List<CartItemDTO>> request = cartService.getCart();
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<List<CartItemDTO>> request = cartAPI.getCart();
         request.enqueue(new Callback<List<CartItemDTO>>() {
 
             @Override
@@ -299,8 +279,8 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
 
     private void deleteCartItem(CartItemDTO cartItem) {
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<CartItemDTO> request = cartService.deleteCartItem(cartItem.getProduct().getId());
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<CartItemDTO> request = cartAPI.deleteCartItem(cartItem.getProduct().getId());
         request.enqueue(new Callback<CartItemDTO>() {
             @Override
             public void onResponse(Call<CartItemDTO> call, Response<CartItemDTO> response) {
@@ -385,9 +365,14 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
 
 
     @Override
-    public void updateCartItemQuantity(CartItem cartItem) {
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<CartItem> request = cartService.updateCartItem(cartItem);
+    public void updateCartItemQuantity(CartItemDTO cartItem) {
+
+        CartItem cart = new CartItem();
+        cart.setQuantity(cartItem.getQuantity());
+        cart.setId_product(cartItem.getProduct().getId());
+
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<CartItem> request = cartAPI.updateCartItem(cart);
         request.enqueue(new Callback<CartItem>() {
             @Override
             public void onResponse(Call<CartItem> call, Response<CartItem> response) {
@@ -397,7 +382,11 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
                     Intent intent = new Intent(mContext, LoginActivity.class);
                     finish();
                     startActivity(intent);
-                } else {
+                }
+                else if (response.code() == 400) {
+                    displayAlertDialog("Số lượng không đủ","Số lượng sản phẩm yêu cầu vượt quá số lượng có sẵn trong kho.");
+                    cartAdapter.restorePreviousQuantity(cartItem);
+                }else {
                     Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
                 }
             }
@@ -414,8 +403,8 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
     }
 
     public List<RedeemedCouponDTO> getCoupons() {
-        CouponService couponService = ServiceBuilder.buildService(CouponService.class);
-        Call<List<RedeemedCouponDTO>> call = couponService.getRedeemedCoupons();
+        CouponAPI couponAPI = ServiceBuilder.buildService(CouponAPI.class);
+        Call<List<RedeemedCouponDTO>> call = couponAPI.getRedeemedCoupons();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         Future<List<RedeemedCouponDTO>> future = executorService.submit(() -> {
@@ -557,6 +546,15 @@ public class CartActivity extends AppCompatActivity implements IOnCartItemListen
         tv_TotalProductDiscount.setText("0 đ");
         tv_TotalVoucherDiscount.setText("0 đ");
         tv_Discount.setText("Chọn hoặc nhập mã giảm giá");
+    }
+
+    private void displayAlertDialog(String title, String content){
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        builder.setIcon(R.drawable.ic_warning) // Đặt icon của Dialog
+                .setTitle(title)
+                .setMessage(content)
+                .setPositiveButton("OK", (dialog, which) -> {}) // do nothing
+                .show();
     }
     private List<CartItemDTO> getCartItemCheckedFromSharePrefs() {
         Type cartItemType = new TypeToken<List<CartItemDTO>>() {}.getType();

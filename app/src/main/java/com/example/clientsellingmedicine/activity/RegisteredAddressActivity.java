@@ -20,8 +20,8 @@ import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
 import com.example.clientsellingmedicine.DTO.AddressDto;
 import com.example.clientsellingmedicine.DTO.Product;
-import com.example.clientsellingmedicine.services.AddressService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.AddressAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -86,8 +86,8 @@ public class RegisteredAddressActivity extends AppCompatActivity implements IOnP
     }
 
     public void getRegisteredAddress() {
-        AddressService addressService = ServiceBuilder.buildService(AddressService.class);
-        Call<List<AddressDto>> request = addressService.getAddress();
+        AddressAPI addressAPI = ServiceBuilder.buildService(AddressAPI.class);
+        Call<List<AddressDto>> request = addressAPI.getAddress();
 
         request.enqueue(new Callback<List<AddressDto>>() {
             @Override

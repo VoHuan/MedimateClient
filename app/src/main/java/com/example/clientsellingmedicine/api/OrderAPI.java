@@ -1,4 +1,4 @@
-package com.example.clientsellingmedicine.services;
+package com.example.clientsellingmedicine.api;
 
 import com.example.clientsellingmedicine.DTO.MomoResponse;
 import com.example.clientsellingmedicine.DTO.OrderDTO;
@@ -20,7 +20,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-public interface OrderService {
+public interface OrderAPI {
     @GET("/api/order")
     Call<List<OrderDTO>> getOrders();
 

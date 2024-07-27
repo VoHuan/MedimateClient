@@ -54,24 +54,22 @@ import com.bumptech.glide.Glide;
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
-import com.example.clientsellingmedicine.Adapter.notificationAdapter;
 import com.example.clientsellingmedicine.Adapter.productAdapter;
 import com.example.clientsellingmedicine.Adapter.feedAdapter;
 import com.example.clientsellingmedicine.DTO.Notification;
+import com.example.clientsellingmedicine.DTO.Token;
 import com.example.clientsellingmedicine.R;
 import com.example.clientsellingmedicine.interfaces.IOnButtonAddToCartClickListener;
 import com.example.clientsellingmedicine.interfaces.IOnFeedItemClickListener;
 import com.example.clientsellingmedicine.interfaces.IOnProductItemClickListener;
 import com.example.clientsellingmedicine.DTO.CartItemDTO;
-import com.example.clientsellingmedicine.DTO.Device;
 import com.example.clientsellingmedicine.DTO.Feed;
 import com.example.clientsellingmedicine.DTO.Product;
 import com.example.clientsellingmedicine.models.CartItem;
-import com.example.clientsellingmedicine.services.CartService;
-import com.example.clientsellingmedicine.services.DeviceService;
-import com.example.clientsellingmedicine.services.NotificationService;
-import com.example.clientsellingmedicine.services.ProductService;
-import com.example.clientsellingmedicine.services.ServiceBuilder;
+import com.example.clientsellingmedicine.api.CartAPI;
+import com.example.clientsellingmedicine.api.NotificationAPI;
+import com.example.clientsellingmedicine.api.ProductAPI;
+import com.example.clientsellingmedicine.api.ServiceBuilder;
 import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.Convert;
 import com.example.clientsellingmedicine.utils.SharedPref;
@@ -138,7 +136,7 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
 
         addControl(view);
         addEvents();
-        saveDevice();
+
         return view;
 
 
@@ -262,18 +260,22 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     }
 
     public void loadData() {
-        getCountCartItems();
-        getCountNotifications();
+        // Don't need user login
         getTopProductsSelling();
         getTopProductsDiscount();
         getTopNewProducts();
         showSlider();
         getFeeds();
+
+        //Sometimes it may fail because the user is not logged in
+        getCountCartItems();
+        getCountNotifications();
+        saveFirebaseDeviceToken();
     }
 
     private void getTopProductsSelling(){
-        ProductService productService = ServiceBuilder.buildService(ProductService.class);
-        Call<List<Product>> request = productService.getBestSellerProducts();
+        ProductAPI productAPI = ServiceBuilder.buildService(ProductAPI.class);
+        Call<List<Product>> request = productAPI.getBestSellerProducts();
 
         request.enqueue(new Callback<List<Product>>() {
             @Override
@@ -302,8 +304,8 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
 
 
     private void getTopNewProducts(){
-        ProductService productService = ServiceBuilder.buildService(ProductService.class);
-        Call<List<Product>> request = productService.getNewProducts();
+        ProductAPI productAPI = ServiceBuilder.buildService(ProductAPI.class);
+        Call<List<Product>> request = productAPI.getNewProducts();
 
         request.enqueue(new Callback<List<Product>>() {
             @Override
@@ -331,8 +333,8 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     }
 
     private void getCountCartItems(){
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<Integer> request = cartService.getTotalItem();
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<Integer> request = cartAPI.getTotalItem();
 
         request.enqueue(new Callback<Integer>() {
             @Override
@@ -353,8 +355,8 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     }
 
     private void getCountNotifications(){
-        NotificationService notificationService = ServiceBuilder.buildService(NotificationService.class);
-        Call<List<Notification>> request = notificationService.getNotification();
+        NotificationAPI notificationAPI = ServiceBuilder.buildService(NotificationAPI.class);
+        Call<List<Notification>> request = notificationAPI.getNotification();
         request.enqueue(new Callback<List<Notification>>() {
             @Override
             public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
@@ -398,8 +400,8 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     }
 
     private void getTopProductsDiscount(){
-        ProductService productService = ServiceBuilder.buildService(ProductService.class);
-        Call<List<Product>> request = productService.getBestPromotionProducts();
+        ProductAPI productAPI = ServiceBuilder.buildService(ProductAPI.class);
+        Call<List<Product>> request = productAPI.getBestPromotionProducts();
 
         request.enqueue(new Callback<List<Product>>() {
             @Override
@@ -420,6 +422,31 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
                 } else {
                     Toast.makeText(mContext, "Somethings was wrong!", Toast.LENGTH_LONG).show();
                 }
+            }
+        });
+    }
+
+    private void saveFirebaseDeviceToken(){
+        Token deviceToken = SharedPref.loadToken(mContext,Constants.FIREBASE_TOKEN_PREFS_NAME, Constants.KEY_FIREBASE_TOKEN);
+
+        NotificationAPI notificationAPI = ServiceBuilder.buildService(NotificationAPI.class);
+        Call<Void> request = notificationAPI.saveDevice(deviceToken);
+
+        request.enqueue(new Callback<Void>() {
+
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Log.d("FCM", "Save firebase device token successfully ! ");
+                }
+                else {
+                    Log.d("FCM", "Save firebase device token failed ! ");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.d("FCM", "Save firebase device token failed ! ");
             }
         });
     }
@@ -670,8 +697,8 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
     private CompletableFuture<Integer> addToCart(CartItem cartItem) {
         CompletableFuture<Integer> future = new CompletableFuture<>();
 
-        CartService cartService = ServiceBuilder.buildService(CartService.class);
-        Call<CartItem> request = cartService.addCartItem(cartItem);
+        CartAPI cartAPI = ServiceBuilder.buildService(CartAPI.class);
+        Call<CartItem> request = cartAPI.addCartItem(cartItem);
 
         request.enqueue(new Callback<CartItem>() {
             @Override
@@ -700,44 +727,6 @@ public class HomeFragment extends Fragment implements IOnProductItemClickListene
 
         return future;
     }
-    private void saveDevice() {
-
-        // Ensure device token is valid
-        if (MainActivity.tokenDevice == null || MainActivity.tokenDevice.isEmpty()) {
-            // Handle case of missing token (e.g., log a warning)
-            return;
-        }
-        Device device = new Device();
-        device.setIdUser(1);
-        device.setStatus(1);
-        device.setToken(MainActivity.tokenDevice.toString().trim());
-
-        DeviceService deviceService = ServiceBuilder.buildService(DeviceService.class);
-
-        Call<Device> saveRequest = deviceService.saveDevice(device);
-
-        saveRequest.enqueue(new Callback<Device>() {
-            @Override
-            public void onResponse(Call<Device> call, Response<Device> response) {
-                if (response.isSuccessful()) {
-                    // Update notification list and UI (optional, based on your needs)
-                    Toast.makeText(mContext, "Device has been saved !", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to save device", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Device> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(mContext, "Failed to save device", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(mContext, "Failed to save device", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-    }
-
 
     @Override
     public void onResume() {
