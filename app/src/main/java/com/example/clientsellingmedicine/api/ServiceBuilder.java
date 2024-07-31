@@ -27,7 +27,7 @@ public class ServiceBuilder {
     //emulater
 //    private static final String URL = "http://10.0.2.2:9000/";
     //device
-    private static final String URL = "http://192.168.1.102:8080/"; //ip Wireless LAN adapter Wi-Fi:
+    private static final String URL = "http://13.54.188.74:3000/"; //ip Wireless LAN adapter Wi-Fi:
 
     //private static final String URL = "https://29fc-27-3-231-52.ngrok-free.app/";
     // Create logger
