@@ -25,6 +25,7 @@
         android:roundIcon="@drawable/logo_medimate"
         android:supportsRtl="true"
         android:theme="@style/Theme.ClientSellingMedicine"
+        android:testOnly="false"
         tools:targetApi="31">
         <activity
             android:name=".activity.MainActivity"

@@ -71,4 +71,8 @@ dependencies {
     implementation ("com.google.android.gms:play-services-auth:20.6.0")
     //loading Animations
     implementation ("com.airbnb.android:lottie:5.2.0")
+    //open browser for captcha verification
+    implementation ("androidx.browser:browser:1.3.0")
+
+    implementation ("com.google.android.gms:play-services-safetynet:18.0.1")
 }
