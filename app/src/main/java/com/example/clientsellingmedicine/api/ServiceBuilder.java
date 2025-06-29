@@ -9,6 +9,7 @@ import com.example.clientsellingmedicine.utils.Constants;
 import com.example.clientsellingmedicine.utils.SharedPref;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.example.clientsellingmedicine.BuildConfig;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -24,12 +25,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServiceBuilder {
-    //emulater
-//    private static final String URL = "http://10.0.2.2:9000/";
-    //device
-    private static final String URL = "http://54.206.99.91:3000/"; //ip Wireless LAN adapter Wi-Fi:
 
-    //private static final String URL = "https://29fc-27-3-231-52.ngrok-free.app/";
+    private static final String URL =  BuildConfig.API_URL;
+
     // Create logger
     private static HttpLoggingInterceptor logger =
             new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);

@@ -1,0 +1,16 @@
+## This file must *NOT* be checked into Version Control Systems,
+# as it contains information specific to your local configuration.
+#
+# Location of the SDK. This is only used by Gradle.
+# For customization when using a Version Control System, please read the
+# header note.
+#Mon Jun 24 15:27:25 ICT 2024
+sdk.dir=C\:\\Users\\huanv\\AppData\\Local\\Android\\Sdk
+
+#If use emulater
+#API_URL=http://10.0.2.2:9000/
+
+API_URL=http://192.168.85.156:3000/
+
+API_KEY=sk_test_ABC123SECRETKEY
+

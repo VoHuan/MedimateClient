@@ -1,7 +1,17 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
 }
+
+val localProps = Properties().apply {
+    load(FileInputStream(rootProject.file("local.properties")))
+}
+
+val apiKey: String = localProps.getProperty("API_KEY") ?: ""
+val apiUrl: String = localProps.getProperty("API_URL") ?: ""
 
 android {
     namespace = "com.example.clientsellingmedicine"
@@ -17,13 +27,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
-        release {
+        getByName("debug") {
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+            buildConfigField("String", "API_URL", "\"$apiUrl\"")
+        }
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            buildConfigField("String", "API_KEY", "\"$apiKey\"")
+            buildConfigField("String", "API_URL", "\"$apiUrl\"")
         }
     }
     compileOptions {
